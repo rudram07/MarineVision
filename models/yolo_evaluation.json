@@ -1,0 +1,21 @@
+{
+  "weights_path": "models/yolo_debris.pt",
+  "split": "test",
+  "precision": 0.0037,
+  "recall": 0.075,
+  "map50": 0.0025,
+  "map50_95": 0.0006,
+  "speed_ms": {
+    "preprocess": 2.5084375358195583,
+    "inference": 76.19543968482236,
+    "loss": 0.0002246418282923183,
+    "postprocess": 3.5822851002877285
+  },
+  "evaluated_at": "2026-10-23 14:13:00",
+  "per_class_map50_95": {
+    "submarine_pipeline": 0.0005,
+    "shipwreck": 0.0,
+    "ghost_net": 0.0018,
+    "mine_cylinder": 0.0
+  }
+}

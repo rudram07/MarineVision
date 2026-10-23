@@ -1,0 +1,10 @@
+path: C:/Users/RUDRA/OneDrive/Desktop/MarineVision/data/sonar_debris
+train: train/images
+val: val/images
+test: test/images
+nc: 4
+names:
+  0: submarine_pipeline
+  1: shipwreck
+  2: ghost_net
+  3: mine_cylinder

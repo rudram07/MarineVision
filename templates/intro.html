@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block title %}Introduction — {{ project_name }}{% endblock %}
+{% block page_title %}Introduction{% endblock %}
+{% block breadcrumb %}Welcome & System Overview{% endblock %}
+
+{% block content %}
+<!-- Hero Section (Invoicify Editorial Aesthetic) -->
+<section class="intro-hero">
+    <div class="intro-badge reveal">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polygon points="12 8 8 12 12 16 16 12 12 8"></polygon>
+        </svg>
+        <span>Research Prototype &bull; BTech Final Year Project &bull; Group 55</span>
+    </div>
+
+    <h1>
+        <span class="reveal-slow inline-reveal word-delay-1">Automate </span>
+        <span class="reveal-slow inline-reveal word-delay-2">your sonar</span><br>
+        <span class="reveal-slow inline-reveal word-delay-3 accent-word">intelligence</span>
+    </h1>
+
+    <p class="intro-summary reveal hero-delay-1">
+        Upload Side-Scan Sonar (SSS) imagery, enhance acoustic contrast instantly with OpenCV CLAHE, and detect underwater marine debris and seabed anomalies — all in one unified, auditable platform.
+    </p>
+
+    <div class="intro-actions reveal hero-delay-2">
+        <a href="{{ url_for('analyze') }}" class="btn btn-primary btn-lg" id="btn-start-analysis">
+            <span>Upload Sonar Imagery &rarr;</span>
+        </a>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary btn-lg" id="btn-open-dashboard">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+            <span>Live Dashboard</span>
+        </a>
+        <a href="#how" class="btn btn-outline btn-lg">
+            <span>How It Works</span>
+        </a>
+    </div>
+</section>
+
+<!-- Features Grid (Why MarineVision) -->
+<section id="features" class="features-section" style="padding: 20px 0 60px;">
+    <div class="section-header">
+        <h2 class="reveal seq-1">Why Choose MarineVision?</h2>
+        <p class="reveal seq-2">Advanced acoustic signal engineering and deep learning, engineered for underwater hydrography.</p>
+    </div>
+    <div class="features-grid">
+        <article class="feature-card reveal seq-3">
+            <div class="feature-icon">🧠</div>
+            <h3>Smart Preprocessing</h3>
+            <p>Bilateral denoising and CLAHE contrast equalization remove speckle noise while preserving critical acoustic shadow edges.</p>
+        </article>
+        <article class="feature-card reveal seq-4">
+            <div class="feature-icon">📦</div>
+            <h3>Debris Detection</h3>
+            <p>Modular YOLO neural architecture engineered to locate anthropogenic marine debris targets in complex acoustic backscatter.</p>
+        </article>
+        <article class="feature-card reveal seq-5">
+            <div class="feature-icon">📄</div>
+            <h3>Instant PDF Export</h3>
+            <p>Download clean, publication-ready scientific survey reports formatted via ReportLab for hydrographic field teams.</p>
+        </article>
+        <article class="feature-card reveal seq-6">
+            <div class="feature-icon">📊</div>
+            <h3>Audit Trail & Analytics</h3>
+            <p>ACID-compliant SQLite relational tracking, live KPI cards, dual-viewport backscatter inspection, and anomaly metrics.</p>
+        </article>
+    </div>
+</section>
+
+<!-- Problem & Proposed Solution Comparison -->
+<div class="content-grid grid-cols-2" style="margin-bottom: 3rem;">
+    <div class="card reveal seq-2">
+        <div class="card-header">
+            <h3 class="card-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <span>The Marine Debris Problem</span>
+            </h3>
+        </div>
+        <div class="card-body">
+            <p style="margin-bottom: 0.85rem; font-size: 0.92rem; color: var(--text-muted); line-height: 1.6;">
+                Underwater environments suffer from severely limited optical visibility. Consequently, marine scientists rely on 
+                <strong>Side-Scan Sonar (SSS)</strong> to map the seabed. However, manual inspection of gigabytes of acoustic imagery is:
+            </p>
+            <ul style="padding-left: 1.25rem; font-size: 0.9rem; color: var(--text-dark); display: flex; flex-direction: column; gap: 0.5rem;">
+                <li><strong>Acoustically Complex:</strong> High speckle noise, acoustic shadows, beam attenuation, and seabed ripple clutter make subtle debris targets hard to distinguish.</li>
+                <li><strong>Labor-Intensive:</strong> Manual review of thousands of waterfall scans requires specialized hydrographic expertise and creates human fatigue.</li>
+                <li><strong>Inconsistent:</strong> Visual interpretation of irregular debris objects varies between observers and lacks standardized analytical records.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="card reveal seq-3">
+        <div class="card-header">
+            <h3 class="card-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+                <span>Proposed Automated Solution</span>
+            </h3>
+        </div>
+        <div class="card-body">
+            <p style="margin-bottom: 0.85rem; font-size: 0.92rem; color: var(--text-muted); line-height: 1.6;">
+                MarineVision delivers an automated software pipeline engineered to process raw SSS imagery, standardize backscatter intensities, and prepare the foundation for neural detection:
+            </p>
+            <ul style="padding-left: 1.25rem; font-size: 0.9rem; color: var(--text-dark); display: flex; flex-direction: column; gap: 0.5rem;">
+                <li><strong>Bilateral & CLAHE Preprocessing:</strong> Eliminates speckle noise while preserving object-shadow contrast boundaries.</li>
+                <li><strong>Modular AI Detectors:</strong> Built-in extensible architecture designed for YOLO debris localization and Autoencoder anomaly scoring.</li>
+                <li><strong>Relational Audit Trail:</strong> Stores all image metadata, operational runs, and parameters in an ACID-compliant SQLite database.</li>
+                <li><strong>Automated PDF Reports:</strong> Generates publication-ready scientific reports on-demand using ReportLab.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- How It Works Section (Invoicify Step Cards) -->
+<section id="how" class="how-section" style="margin-bottom: 3rem; border-radius: var(--radius);">
+    <div class="section-header">
+        <h2 class="reveal">How It Works</h2>
+        <p class="reveal reveal-delay-1">Three simple steps from acoustic scan to scientific insight.</p>
+    </div>
+    <div class="steps-grid">
+        <article class="step-card reveal reveal-delay-1">
+            <div class="step-number">01</div>
+            <h3>Upload Sonar Data</h3>
+            <p>Drag and drop raw SSS waterfall imagery — JPG, PNG, or TIFF format with server-side OpenCV integrity verification.</p>
+        </article>
+        <article class="step-card reveal reveal-delay-2">
+            <div class="step-number">02</div>
+            <h3>Enhance & Detect</h3>
+            <p>Bilateral filter and CLAHE contrast normalization standardize acoustic intensity for modular YOLO debris & autoencoder anomaly pipelines.</p>
+        </article>
+        <article class="step-card reveal reveal-delay-3">
+            <div class="step-number">03</div>
+            <h3>Analyze & Export</h3>
+            <p>Inspect synchronized dual viewports, review detection coordinates, and export field-ready scientific PDF survey reports.</p>
+        </article>
+    </div>
+</section>
+
+<!-- Tech Stack Strip (Pill Badges) -->
+<section class="tech-strip reveal" style="margin-bottom: 2.5rem;">
+    <p style="color: var(--text-light); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px; font-weight: 600; margin-bottom: 20px; text-align: center;">
+        Powered By Research-Grade Technology Stack
+    </p>
+    <div class="tech-logos">
+        <span>OpenCV 4 (CLAHE)</span>
+        <span>Python 3.12</span>
+        <span>Flask 2.3</span>
+        <span>YOLOv8 Pipeline</span>
+        <span>ReportLab PDF</span>
+        <span>SQLite 3</span>
+        <span>PyTorch</span>
+    </div>
+</section>
+
+<!-- Project Metadata Card -->
+<div class="card reveal" style="margin-bottom: 1.5rem;">
+    <div class="card-body" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h4 style="font-size: 0.95rem; color: var(--accent); margin-bottom: 0.2rem; font-weight: 700;">Academic Project Information</h4>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">
+                Institute of Advanced Research &bull; Department of Computer Engineering &bull; Group 55 (CodeQuacks)
+            </p>
+        </div>
+        <div style="font-size: 0.85rem; color: var(--text-muted); text-align: right;">
+            <strong>Supervisor:</strong> {{ supervisor }} &bull; 
+            <strong>Scholars:</strong> Rudra Mistry (14311), Jaimin Thakkar (14159), Meet Patel (14486)
+        </div>
+    </div>
+</div>
+{% endblock %}

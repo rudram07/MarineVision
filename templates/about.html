@@ -1,0 +1,308 @@
+{% extends "base.html" %}
+
+{% block title %}About the System — {{ project_name }}{% endblock %}
+{% block page_title %}About MarineVision{% endblock %}
+{% block breadcrumb %}System Specifications & Architecture{% endblock %}
+
+{% block content %}
+<!-- Project Overview Card -->
+<div class="card reveal" style="margin-bottom: 2rem;">
+    <div class="card-header">
+        <h3 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            <span>Project Overview</span>
+        </h3>
+        <span class="badge-tag badge-info">CodeQuacks (Group 55)</span>
+    </div>
+    <div class="card-body">
+        <p style="font-size: 0.95rem; line-height: 1.7; color: var(--text-dark); margin-bottom: 1.25rem;">
+            <strong>MarineVision</strong> is an automated intelligence system engineered to address the critical challenge of 
+            detecting anthropogenic marine debris and geological acoustic anomalies on the seabed using <strong>Side-Scan Sonar (SSS)</strong> imagery.
+            Underwater surveys produce dense waterfall acoustic datasets that are traditionally scrutinized by human hydrographers. 
+            MarineVision provides an integrated computational framework combining computer-vision preprocessing, relational metadata tracking, 
+            modular deep-learning detection interfaces, and automated PDF survey documentation.
+        </p>
+
+        <div style="background: var(--bg-subtle); padding: 1.1rem 1.4rem; border-radius: var(--radius-sm); border-left: 4px solid var(--accent); font-size: 0.9rem; color: var(--text-dark);">
+            <strong>Formal Academic Project Title:</strong><br/>
+            <em style="color: var(--accent); font-weight: 500;">"AI-Powered Automated Underwater Marine Debris and Anomaly Detection System using Side-Scan Sonar Imagery"</em>
+        </div>
+    </div>
+</div>
+
+<!-- Problem Statement & Objectives Grid -->
+<div class="content-grid grid-cols-2" style="margin-bottom: 2rem;">
+    <!-- Problem Statement -->
+    <div class="card reveal seq-1">
+        <div class="card-header">
+            <h3 class="card-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <span>Problem Statement</span>
+            </h3>
+        </div>
+        <div class="card-body">
+            <p style="font-size: 0.9rem; line-height: 1.6; color: var(--text-muted); margin-bottom: 0.85rem;">
+                Manual inspection of underwater acoustic imagery suffers from major physical and cognitive bottlenecks:
+            </p>
+            <ul style="padding-left: 1.2rem; font-size: 0.88rem; display: flex; flex-direction: column; gap: 0.5rem; color: var(--text-dark);">
+                <li><strong>Severe Acoustic Noise:</strong> Rayleigh speckle noise and high-frequency scattering obscure object contours.</li>
+                <li><strong>Acoustic Shadow Complexity:</strong> Objects are identified by both bright specular reflections and dark acoustic shadows cast opposite the sonar transducer.</li>
+                <li><strong>Varied Seabed Textures:</strong> Sand ripples, rock ridges, and silt deposits generate high false-positive clutter.</li>
+                <li><strong>Human Operator Fatigue:</strong> Inspecting hundreds of survey kilometers manually causes inconsistent and subjective interpretation.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Objectives -->
+    <div class="card reveal seq-2">
+        <div class="card-header">
+            <h3 class="card-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2">
+                    <polyline points="9 11 12 14 22 4"></polyline>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                </svg>
+                <span>Project Objectives</span>
+            </h3>
+        </div>
+        <div class="card-body">
+            <ul style="padding-left: 1.2rem; font-size: 0.88rem; display: flex; flex-direction: column; gap: 0.45rem; color: var(--text-dark);">
+                <li>Accept Side-Scan Sonar images in standard formats (JPG, PNG, TIFF).</li>
+                <li>Validate format, size constraints (10 MB), and OpenCV pixel decoding integrity.</li>
+                <li>Execute acoustic contrast enhancement via CLAHE and bilateral filtering.</li>
+                <li>Integrate a YOLO-based deep-learning model for localizing debris targets.</li>
+                <li>Integrate a CNN / Autoencoder approach for detecting anomalous seabed patterns.</li>
+                <li>Provide synchronized side-by-side visualization of original vs processed sonar.</li>
+                <li>Persist audit trails, run parameters, and detections in a relational SQLite database.</li>
+                <li>Generate downloadable, field-ready scientific PDF analysis reports.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- 8-Stage System Workflow -->
+<div class="card reveal seq-2" style="margin-bottom: 2rem;">
+    <div class="card-header">
+        <h3 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+            </svg>
+            <span>8-Stage System Workflow Pipeline</span>
+        </h3>
+        <span class="badge-tag badge-success">UML Level 2 Architecture</span>
+    </div>
+    <div class="card-body">
+        <div class="content-grid grid-cols-4" style="gap: 1rem;">
+            <div style="background: var(--bg-card); padding: 1.1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-light);">
+                <div style="font-weight: 700; color: var(--accent); margin-bottom: 0.35rem; font-family: var(--font-display);">1. Image Upload</div>
+                <p style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.5;">Operator submits SSS image via drag-and-drop or file picker.</p>
+            </div>
+            <div style="background: var(--bg-card); padding: 1.1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-light);">
+                <div style="font-weight: 700; color: var(--accent); margin-bottom: 0.35rem; font-family: var(--font-display);">2. Image Validation</div>
+                <p style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.5;">Checks format (JPG/PNG/TIFF), 10 MB limit, and OpenCV decodability.</p>
+            </div>
+            <div style="background: var(--bg-card); padding: 1.1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-light);">
+                <div style="font-weight: 700; color: var(--accent); margin-bottom: 0.35rem; font-family: var(--font-display);">3. Image Preprocessing</div>
+                <p style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.5;">Bilateral noise filtering, CLAHE contrast tuning, and dynamic range normalization.</p>
+            </div>
+            <div style="background: var(--bg-card); padding: 1.1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-light);">
+                <div style="font-weight: 700; color: var(--accent); margin-bottom: 0.35rem; font-family: var(--font-display);">4. Debris Detection</div>
+                <p style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.5;">YOLO model interface evaluates bounding coordinates and class confidence.</p>
+            </div>
+            <div style="background: var(--bg-card); padding: 1.1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-light);">
+                <div style="font-weight: 700; color: var(--accent); margin-bottom: 0.35rem; font-family: var(--font-display);">5. Anomaly Detection</div>
+                <p style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.5;">Autoencoder reconstruction error identifies unusual acoustic seabed signatures.</p>
+            </div>
+            <div style="background: var(--bg-card); padding: 1.1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-light);">
+                <div style="font-weight: 700; color: var(--accent); margin-bottom: 0.35rem; font-family: var(--font-display);">6. Result Visualization</div>
+                <p style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.5;">Renders dual viewports, bounding overlays, and comparative highlights.</p>
+            </div>
+            <div style="background: var(--bg-card); padding: 1.1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-light);">
+                <div style="font-weight: 700; color: var(--accent); margin-bottom: 0.35rem; font-family: var(--font-display);">7. Database Storage</div>
+                <p style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.5;">SQLite stores images, runs, detections, anomalies with ACID foreign keys.</p>
+            </div>
+            <div style="background: var(--bg-card); padding: 1.1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-light);">
+                <div style="font-weight: 700; color: var(--accent); margin-bottom: 0.35rem; font-family: var(--font-display);">8. PDF Report</div>
+                <p style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.5;">ReportLab compiles verifiable PDF with embedded thumbnails and timings.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Technology Stack Breakdown -->
+<div class="card reveal seq-3" style="margin-bottom: 2rem;">
+    <div class="card-header">
+        <h3 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+                <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+                <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+                <line x1="6" y1="6" x2="6.01" y2="6"></line>
+                <line x1="6" y1="18" x2="6.01" y2="18"></line>
+            </svg>
+            <span>Tools & Technologies Used</span>
+        </h3>
+    </div>
+    <div class="card-body" style="padding: 0;">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Technology</th>
+                        <th>Specific Role & Purpose</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Frontend Structure</strong></td>
+                        <td>HTML5 & Jinja2</td>
+                        <td>Server-rendered semantic markup, modular layout inheritance, and form handling</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Styling & Design</strong></td>
+                        <td>CSS3 (Vanilla)</td>
+                        <td>Invoicify-inspired editorial design system, Bricolage Grotesque typography, preserved Ember Glow aura</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Interactivity</strong></td>
+                        <td>JavaScript (Vanilla)</td>
+                        <td>Drag-and-drop file upload, client-side validation, instant image preview, dark/light theme switching</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Backend Framework</strong></td>
+                        <td>Python 3 & Flask</td>
+                        <td>Application routing, file validation orchestration, pipeline execution, and HTTP services</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Image Processing</strong></td>
+                        <td>OpenCV (cv2)</td>
+                        <td>Acoustic speckle bilateral filtering, CLAHE contrast equalization, image decoding/validation</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Array Operations</strong></td>
+                        <td>NumPy</td>
+                        <td>Multi-dimensional matrix manipulation, intensity normalization, and synthetic generation</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Database</strong></td>
+                        <td>SQLite3</td>
+                        <td>Relational data persistence with foreign keys (PRAGMA foreign_keys = ON) and cascade rules</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Object Detection</strong></td>
+                        <td>PyTorch / YOLO</td>
+                        <td>Modular neural architecture ready to load trained marine debris weights (.pt)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Anomaly Detection</strong></td>
+                        <td>CNN / Autoencoder</td>
+                        <td>Unsupervised reconstruction-error scoring interface for unusual seabed textures</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Report Generation</strong></td>
+                        <td>ReportLab</td>
+                        <td>Dynamic programmatic compilation of scientific PDF reports with embedded thumbnails</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Development IDE</strong></td>
+                        <td>Visual Studio Code</td>
+                        <td>Primary development environment for coding, testing, debugging, and git version control</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Implemented vs Future Planned Enhancements -->
+<div class="content-grid grid-cols-2" style="margin-bottom: 2rem;">
+    <!-- Currently Implemented -->
+    <div class="card reveal seq-3">
+        <div class="card-header">
+            <h3 class="card-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span>Currently Implemented & Verified</span>
+            </h3>
+        </div>
+        <div class="card-body">
+            <ul style="padding-left: 1.2rem; font-size: 0.88rem; display: flex; flex-direction: column; gap: 0.45rem; color: #065F46;">
+                <li>Complete 5-page navigation shell with unified sidebar.</li>
+                <li>Combined Upload, Processing & Results single-page workflow.</li>
+                <li>Server-side file validation (format, size, and OpenCV decoding).</li>
+                <li>OpenCV Bilateral & CLAHE contrast enhancement pipeline.</li>
+                <li>SQLite 5-table schema with foreign keys and cascade integrity.</li>
+                <li>Live database dashboard metrics and recent upload tracking.</li>
+                <li>Audit-ready Analysis History with search and filtering.</li>
+                <li>Authentic ReportLab PDF report generation with thumbnails.</li>
+                <li>Modular AI model interfaces with honest availability checking.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Planned Future Enhancements -->
+    <div class="card reveal seq-4">
+        <div class="card-header">
+            <h3 class="card-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 14 14"></polyline>
+                </svg>
+                <span>Planned Future Enhancements (Report III)</span>
+            </h3>
+        </div>
+        <div class="card-body">
+            <ul style="padding-left: 1.2rem; font-size: 0.88rem; display: flex; flex-direction: column; gap: 0.45rem; color: #92400E;">
+                <li>Training custom YOLO weights on labeled sonar datasets (e.g. SeabedObjects, SSS-Debris).</li>
+                <li>Training deep autoencoder on clean seabed backscatter for reconstruction error anomaly scores.</li>
+                <li>Drop-in weight loading into <code>models/yolo_debris.pt</code> and <code>models/autoencoder_anomaly.pth</code>.</li>
+                <li>Quantitative model-performance evaluation (mAP@50, Precision, Recall, F1-score).</li>
+                <li>Geographic GIS coordinate geotiff integration for hydrographic survey mapping.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Academic & Team Credits -->
+<div class="card reveal">
+    <div class="card-header">
+        <h3 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            <span>Academic Project Scholars & Supervisor</span>
+        </h3>
+    </div>
+    <div class="card-body">
+        <div class="content-grid grid-cols-2" style="gap: 1.5rem;">
+            <div>
+                <h4 style="font-size: 0.95rem; color: var(--accent); margin-bottom: 0.5rem; font-weight: 700;">Project Scholars — CodeQuacks (Group 55)</h4>
+                <ul style="padding-left: 1.2rem; font-size: 0.88rem; display: flex; flex-direction: column; gap: 0.35rem; color: var(--text-dark);">
+                    {% for scholar in scholars %}
+                        <li><strong>{{ scholar.name }}</strong> &bull; Registration No: {{ scholar.reg_no }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div>
+                <h4 style="font-size: 0.95rem; color: var(--accent); margin-bottom: 0.5rem; font-weight: 700;">Supervision & Institution</h4>
+                <p style="font-size: 0.88rem; color: var(--text-dark); line-height: 1.6;">
+                    <strong>Supervisor:</strong> {{ supervisor }}<br/>
+                    <strong>Program:</strong> BTech Computer Engineering, Semester 7th (AI)<br/>
+                    <strong>University:</strong> {{ institution }}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

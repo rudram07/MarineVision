@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ project_name }}{% endblock %} — {{ project_tagline }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <a href="{{ url_for('dashboard') }}" class="sidebar-brand">
+                <div class="brand-icon-box">
+                    <!-- Sonar Pulse SVG Icon -->
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="2"></circle>
+                        <path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m12.72-4.24a12 12 0 0 1 0 16.97m-16.96 0a12 12 0 0 1 0-16.97"></path>
+                    </svg>
+                </div>
+                <div class="brand-text">
+                    <h1>{{ project_name }}</h1>
+                    <p>Sonar Intelligence</p>
+                </div>
+            </a>
+
+            <div class="sidebar-nav">
+                <span class="nav-label">Navigation</span>
+                <a href="{{ url_for('intro') }}" class="nav-item {% if active_page == 'intro' %}active{% endif %}" id="nav-intro">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                    <span>Introduction</span>
+                </a>
+
+                <a href="{{ url_for('dashboard') }}" class="nav-item {% if active_page == 'dashboard' %}active{% endif %}" id="nav-dashboard">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                    <span>Dashboard</span>
+                </a>
+
+                <a href="{{ url_for('analyze') }}" class="nav-item {% if active_page == 'analyze' %}active{% endif %}" id="nav-analyze">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <span>Upload & Analyze</span>
+                </a>
+
+                <a href="{{ url_for('history') }}" class="nav-item {% if active_page == 'history' %}active{% endif %}" id="nav-history">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 14 14"></polyline>
+                    </svg>
+                    <span>Analysis History</span>
+                </a>
+
+                <a href="{{ url_for('about') }}" class="nav-item {% if active_page == 'about' %}active{% endif %}" id="nav-about">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                    </svg>
+                    <span>About System</span>
+                </a>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="model-pill-widget">
+                    <div class="model-pill-title">
+                        <span>Model Pipeline</span>
+                        <span class="badge-tag {% if debris_model_available and anomaly_model_available %}badge-success{% else %}badge-pending{% endif %}" style="font-size:0.65rem; padding: 0.15rem 0.4rem;">
+                            {% if debris_model_available and anomaly_model_available %}ACTIVE{% else %}PENDING{% endif %}
+                        </span>
+                    </div>
+                    <div class="model-status-row">
+                        <span>OpenCV Preprocessor</span>
+                        <span><span class="model-dot dot-active"></span>Active</span>
+                    </div>
+                    <div class="model-status-row">
+                        <span>YOLO Debris Detector</span>
+                        <span>
+                            <span class="model-dot {% if debris_model_available %}dot-active{% else %}dot-pending{% endif %}"></span>
+                            {% if debris_model_available %}Loaded{% else %}Pending{% endif %}
+                        </span>
+                    </div>
+                    <div class="model-status-row">
+                        <span>Autoencoder Anomaly</span>
+                        <span>
+                            <span class="model-dot {% if anomaly_model_available %}dot-active{% else %}dot-pending{% endif %}"></span>
+                            {% if anomaly_model_available %}Loaded{% else %}Pending{% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Workspace Area with Ember Glow Aura Gradient -->
+        <div class="main-wrapper aura-bg">
+            <!-- Aura Gradient Layers (blend-mode: multiply against body #faf8f2) -->
+            <div class="aura-layer-1" aria-hidden="true"></div>
+            <div class="aura-layer-2" aria-hidden="true"></div>
+
+            <!-- Page content sitting above the layers -->
+            <div style="position: relative; z-index: 1; display: flex; flex-direction: column; min-height: 100vh; flex: 1;">
+                <!-- Top Navigation Header -->
+                <header class="top-header">
+                    <div class="header-left">
+                        <div class="page-title">
+                            {% block page_title %}Dashboard{% endblock %}
+                        </div>
+                        <div class="breadcrumb-trail">
+                            <a href="{{ url_for('dashboard') }}">MarineVision</a>
+                            <span>/</span>
+                            <span>{% block breadcrumb %}Overview{% endblock %}</span>
+                        </div>
+                    </div>
+
+                    <div class="header-right">
+                        <div class="badge-tag badge-info">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                            </svg>
+                            <span>Local SSS Analytics</span>
+                        </div>
+                        <button class="btn-icon" id="theme-toggle" type="button" title="Toggle theme">🌙</button>
+                        <a href="{{ url_for('analyze') }}" class="btn btn-teal btn-sm" id="header-btn-upload">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            <span>Analyze Sonar</span>
+                        </a>
+                    </div>
+                </header>
+
+                <!-- Main Content Container -->
+                <main class="content-area">
+                    <!-- Flash Messages -->
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }}">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        {% if category == 'success' %}
+                                            <polyline points="20 6 9 17 4 12"></polyline>
+                                        {% elif category == 'danger' or category == 'warning' %}
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                        {% else %}
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                        {% endif %}
+                                    </svg>
+                                    <span>{{ message }}</span>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    {% block content %}{% endblock %}
+                </main>
+
+                <!-- Global Footer -->
+                <footer class="app-footer">
+                    <div>
+                        <strong>{{ project_name }}</strong> &bull; {{ project_tagline }} &bull; {{ institution }}
+                    </div>
+                    <div>
+                        Group {{ group_no }} ({{ group_name }}) &bull; Scholars: Rudra M., Jaimin T., Meet P. &bull; Supervisor: {{ supervisor }}
+                    </div>
+                </footer>
+            </div>
+        </div>
+    </div>
+
+    <!-- Processing Modal Overlay -->
+    <div id="processingModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(7,15,43,0.85); z-index:999; align-items:center; justify-content:center; flex-direction:column; color:#FFF;">
+        <div style="background:#0B192C; padding:2.5rem; border-radius:14px; text-align:center; max-width:420px; border:1px solid rgba(0,173,181,0.3); box-shadow:0 20px 40px rgba(0,0,0,0.5);">
+            <div style="width:56px; height:56px; border:3px solid rgba(0,173,181,0.2); border-top-color:#00ADB5; border-radius:50%; margin:0 auto 1.5rem; animation:radar-spin 1s linear infinite;"></div>
+            <h3 style="font-size:1.15rem; margin-bottom:0.5rem; color:#FFFFFF;">Processing Sonar Imagery</h3>
+            <p id="processingModalText" style="font-size:0.85rem; color:#94A3B8;">Executing OpenCV Enhancement & Analysis Pipeline...</p>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

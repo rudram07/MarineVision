@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard — {{ project_name }}{% endblock %}
+{% block page_title %}Analytics Dashboard{% endblock %}
+{% block breadcrumb %}Dashboard Overview{% endblock %}
+
+{% block content %}
+<!-- Welcome & Action Banner -->
+<div class="card reveal" style="margin-bottom: 2rem;">
+    <div class="card-body" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.5rem;">
+        <div>
+            <div style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent); margin-bottom: 0.4rem;">
+                Operational Intelligence Console
+            </div>
+            <h2 style="font-size: 1.6rem; font-weight: 700; color: var(--text-dark); margin-bottom: 0.4rem;">
+                Side-Scan Sonar <span class="accent-word" style="color: var(--accent); font-style: italic;">Analytics & Ingest</span>
+            </h2>
+            <p style="font-size: 0.95rem; color: var(--text-muted); max-width: 680px; line-height: 1.6;">
+                Welcome to the MarineVision operational console. Monitor sonar image ingest status, inspect preprocessed backscatter, 
+                and review debris and anomaly detection records directly from the SQLite database.
+            </p>
+        </div>
+        <div style="display: flex; gap: 0.85rem; flex-wrap: wrap;">
+            <a href="{{ url_for('history') }}" class="btn btn-secondary" id="btn-view-history">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 14 14"></polyline>
+                </svg>
+                <span>Analysis History</span>
+            </a>
+            <a href="{{ url_for('analyze') }}" class="btn btn-primary" id="btn-dashboard-upload">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <span>Upload New Image</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- 4 Live SQLite Summary Cards (Invoicify Metric Cards) -->
+<div class="content-grid grid-cols-4" style="margin-bottom: 2rem;">
+    <!-- Metric 1: Total Images -->
+    <div class="card metric-card card-blue reveal seq-1" id="metric-total-images">
+        <div class="metric-info">
+            <h3>Total Images</h3>
+            <div class="metric-number">{{ metrics.total_images }}</div>
+            <div style="font-size: 0.75rem; color: var(--text-light); margin-top: 0.35rem;">Stored SSS Records</div>
+        </div>
+        <div class="metric-icon-box">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Metric 2: Completed Analyses -->
+    <div class="card metric-card card-green reveal seq-2" id="metric-completed-runs">
+        <div class="metric-info">
+            <h3>Completed Runs</h3>
+            <div class="metric-number">{{ metrics.completed_analyses }}</div>
+            <div style="font-size: 0.75rem; color: var(--text-light); margin-top: 0.35rem;">Preprocessed & Analyzed</div>
+        </div>
+        <div class="metric-icon-box">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Metric 3: Pending Analyses -->
+    <div class="card metric-card card-amber reveal seq-3" id="metric-pending-runs">
+        <div class="metric-info">
+            <h3>Pending Runs</h3>
+            <div class="metric-number">{{ metrics.pending_analyses }}</div>
+            <div style="font-size: 0.75rem; color: var(--text-light); margin-top: 0.35rem;">In Queue / Uploaded</div>
+        </div>
+        <div class="metric-icon-box">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 14 14"></polyline>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Metric 4: Detected Debris Objects -->
+    <div class="card metric-card card-teal reveal seq-4" id="metric-detected-debris">
+        <div class="metric-info">
+            <h3>Detected Debris</h3>
+            <div class="metric-number">{{ metrics.detected_debris }}</div>
+            <div style="font-size: 0.75rem; color: var(--text-light); margin-top: 0.35rem;">Target Objects (AI)</div>
+        </div>
+        <div class="metric-icon-box">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                <polyline points="2 17 12 22 22 17"></polyline>
+                <polyline points="2 12 12 17 22 12"></polyline>
+            </svg>
+        </div>
+    </div>
+</div>
+
+<!-- Main Dashboard Split: Recent Uploads & Model Status -->
+<div class="content-grid grid-cols-3" style="margin-bottom: 2rem;">
+    <!-- Recent Uploads Table (Span 2 columns) -->
+    <div class="card reveal seq-2" style="grid-column: span 2;">
+        <div class="card-header">
+            <h3 class="card-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+                    <line x1="8" y1="6" x2="21" y2="6"></line>
+                    <line x1="8" y1="12" x2="21" y2="12"></line>
+                    <line x1="8" y1="18" x2="21" y2="18"></line>
+                    <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                    <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                    <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                </svg>
+                <span>Recent Sonar Uploads</span>
+            </h3>
+            <a href="{{ url_for('history') }}" class="btn btn-outline btn-sm">View Full History &rarr;</a>
+        </div>
+        <div class="card-body" style="padding: 0;">
+            {% if recent_uploads %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Image ID</th>
+                            <th>Filename</th>
+                            <th>Dimensions</th>
+                            <th>Upload Date</th>
+                            <th>Status</th>
+                            <th style="text-align: right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in recent_uploads %}
+                        <tr>
+                            <td><strong>#{{ item.image_id }}</strong></td>
+                            <td>
+                                <div style="font-weight: 600; color: var(--text-dark);">{{ item.original_filename }}</div>
+                                <div style="font-size: 0.75rem; color: var(--text-light);">{{ item.file_format }} &bull; {{ item.file_size_kb }} KB</div>
+                            </td>
+                            <td>{{ item.width_px }} &times; {{ item.height_px }} px</td>
+                            <td style="font-size: 0.8rem; color: var(--text-muted);">{{ item.uploaded_at }}</td>
+                            <td>
+                                {% if item.run_status == 'COMPLETED' or item.image_status == 'ANALYZED' %}
+                                    <span class="badge-tag badge-success">ANALYZED</span>
+                                {% elif item.run_status == 'RUNNING' or item.image_status == 'PROCESSING' %}
+                                    <span class="badge-tag badge-pending">PROCESSING</span>
+                                {% elif item.image_status == 'FAILED' %}
+                                    <span class="badge-tag badge-pending" style="color:#DC2626; border-color:#FECACA; background:#FEF2F2;">FAILED</span>
+                                {% else %}
+                                    <span class="badge-tag badge-info">{{ item.image_status }}</span>
+                                {% endif %}
+                            </td>
+                            <td style="text-align: right;">
+                                <a href="{{ url_for('analyze_view', image_id=item.image_id) }}" class="btn btn-teal btn-sm">
+                                    View Results
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <!-- Attractive Empty State for Empty Database -->
+            <div class="empty-state">
+                <div class="empty-icon-box">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="12" y1="8" x2="12" y2="16"></line>
+                        <line x1="8" y1="12" x2="16" y2="12"></line>
+                    </svg>
+                </div>
+                <h4 class="empty-title">No Sonar Imagery Recorded Yet</h4>
+                <p class="empty-desc">
+                    Your SQLite database is active and ready. Upload your first Side-Scan Sonar image or test with a sample file to view real analysis.
+                </p>
+                <div style="display: flex; justify-content: center; gap: 0.75rem;">
+                    <a href="{{ url_for('analyze') }}" class="btn btn-primary btn-sm">Upload Sonar File</a>
+                    <button class="btn btn-outline btn-sm btn-load-sample" data-sample="debris">Load Sample SSS Image</button>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Right Column: Model Status & Quick Load Panel -->
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <!-- Model Status Card -->
+        <div class="card reveal seq-3">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+                        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                        <polyline points="2 17 12 22 22 17"></polyline>
+                        <polyline points="2 12 12 17 22 12"></polyline>
+                    </svg>
+                    <span>Model Integration Status</span>
+                </h3>
+            </div>
+            <div class="card-body" style="font-size: 0.88rem;">
+                <!-- Debris Detector -->
+                <div class="model-status-card-box {% if debris_model_available %}active{% endif %}">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                        <strong style="color: var(--text-dark);">YOLO Debris Detector</strong>
+                        <span class="badge-tag {% if debris_model_available %}badge-success{% else %}badge-pending{% endif %}" style="font-size:0.7rem;">
+                            {% if debris_model_available %}ACTIVE{% else %}PENDING INTEGRATION{% endif %}
+                        </span>
+                    </div>
+                    <p class="model-status-card-desc">
+                        {{ debris_model_info.status_message }}
+                    </p>
+                </div>
+
+                <!-- Anomaly Detector -->
+                <div class="model-status-card-box {% if anomaly_model_available %}active{% endif %}">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                        <strong style="color: var(--text-dark);">Autoencoder Anomaly Model</strong>
+                        <span class="badge-tag {% if anomaly_model_available %}badge-success{% else %}badge-pending{% endif %}" style="font-size:0.7rem;">
+                            {% if anomaly_model_available %}ACTIVE{% else %}PENDING INTEGRATION{% endif %}
+                        </span>
+                    </div>
+                    <p class="model-status-card-desc">
+                        {{ anomaly_model_info.status_message }}
+                    </p>
+                </div>
+
+                <div style="font-size: 0.78rem; color: var(--text-muted); background: var(--bg-subtle); padding: 0.75rem 0.85rem; border-radius: var(--radius-sm); border: 1px dashed var(--border-light);">
+                    <strong>Honesty Guarantee:</strong> Per university project standards, no simulated or fabricated detections are presented.
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick 1-Click Sonar Tester -->
+        <div class="card reveal seq-4">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M12 16v-4"></path>
+                        <path d="M12 8h.01"></path>
+                    </svg>
+                    <span>Instant Sample Testing</span>
+                </h3>
+            </div>
+            <div class="card-body">
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.85rem;">
+                    Test the complete preprocessing and analysis pipeline instantly with synthetic SSS backscatter samples:
+                </p>
+                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    <button class="btn btn-outline btn-sm btn-load-sample" data-sample="debris" style="justify-content: flex-start; text-align: left;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        <span>Test Sonar: Metallic Debris & Shadow</span>
+                    </button>
+                    <button class="btn btn-outline btn-sm btn-load-sample" data-sample="anomaly" style="justify-content: flex-start; text-align: left;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                            <polyline points="2 17 12 22 22 17"></polyline>
+                            <polyline points="2 12 12 17 22 12"></polyline>
+                        </svg>
+                        <span>Test Sonar: Seabed Anomaly Crater</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

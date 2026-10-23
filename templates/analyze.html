@@ -1,0 +1,506 @@
+{% extends "base.html" %}
+
+{% block title %}Upload & Analyze — {{ project_name }}{% endblock %}
+{% block page_title %}Upload, Processing & Results{% endblock %}
+{% block breadcrumb %}Upload & Analyze{% endblock %}
+
+{% block content %}
+<!-- Section A: Page Header & Model Indicators -->
+<div class="card reveal" style="margin-bottom: 2rem;">
+    <div class="card-body" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.25rem;">
+        <div>
+            <div style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent); margin-bottom: 0.35rem;">
+                Acoustic Processing Portal
+            </div>
+            <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--text-dark); margin-bottom: 0.3rem;">
+                Side-Scan Sonar <span class="accent-word" style="color: var(--accent); font-style: italic;">Analysis Pipeline</span>
+            </h2>
+            <p style="font-size: 0.92rem; color: var(--text-muted); line-height: 1.6;">
+                Combined portal for image validation, OpenCV contrast enhancement, AI model inference, and scientific report compilation.
+            </p>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+            <span class="badge-tag badge-success">OpenCV Preprocessing: Active</span>
+            <span class="badge-tag {% if debris_model_available %}badge-success{% else %}badge-pending{% endif %}">
+                YOLO Debris: {% if debris_model_available %}Loaded{% else %}Pending{% endif %}
+            </span>
+            <span class="badge-tag {% if anomaly_model_available %}badge-success{% else %}badge-pending{% endif %}">
+                Anomaly Model: {% if anomaly_model_available %}Loaded{% else %}Pending{% endif %}
+            </span>
+        </div>
+    </div>
+</div>
+
+<!-- Section B: Image Upload Panel (Invoicify Dropzone) -->
+<div class="card reveal seq-1" style="margin-bottom: 2rem;">
+    <div class="card-header">
+        <h3 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            <span>Upload Sonar Imagery (SSS)</span>
+        </h3>
+        <span style="font-size: 0.82rem; color: var(--text-muted); font-weight: 500;">Max Size: 10 MB &bull; SSS Waterfall Scans</span>
+    </div>
+    <div class="card-body">
+        <form id="imageUploadForm" action="{{ url_for('handle_upload') }}" method="POST" enctype="multipart/form-data">
+            <!-- Hidden native file input -->
+            <input type="file" id="imageFileInput" name="image" accept=".jpg,.jpeg,.png,.tif,.tiff" style="display: none;">
+
+            <!-- Drag & Drop Zone -->
+            <div class="upload-dropzone" id="uploadDropzone">
+                <div class="dropzone-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="16 16 12 12 8 16"></polyline>
+                        <line x1="12" y1="12" x2="12" y2="21"></line>
+                        <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path>
+                        <polyline points="16 16 12 12 8 16"></polyline>
+                    </svg>
+                </div>
+                <div class="dropzone-title">Drag & drop your Side-Scan Sonar image here</div>
+                <div class="dropzone-desc">or click this area to browse local storage</div>
+                
+                <div class="file-specs">
+                    <span>Supported Formats: JPG, JPEG, PNG, TIFF</span>
+                    <span>&bull;</span>
+                    <span>Max File Size: 10 MB</span>
+                    <span>&bull;</span>
+                    <span>Min Dimensions: 64&times;64 px</span>
+                </div>
+            </div>
+
+            <!-- Client-Side Live Preview Box -->
+            <div class="preview-container" id="previewContainer">
+                <div class="preview-details">
+                    <div class="preview-img-box">
+                        <img id="previewImg" src="" alt="Sonar preview">
+                    </div>
+                    <div style="flex: 1;">
+                        <h4 id="previewFilename" style="font-size: 1rem; font-weight: 700; color: var(--text-dark); margin-bottom: 0.35rem;"></h4>
+                        <div style="font-size: 0.85rem; color: var(--text-muted); display: flex; gap: 1.25rem; margin-bottom: 0.85rem;">
+                            <span>Size: <strong id="previewFilesize" style="color: var(--text-dark);">-</strong></span>
+                            <span>Dimensions: <strong id="previewDimensions" style="color: var(--text-dark);">-</strong></span>
+                        </div>
+                        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                            <button type="submit" class="btn btn-primary btn-sm" id="btnUploadSubmit">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span>Execute Upload & Analysis</span>
+                            </button>
+                            <button type="button" class="btn btn-outline btn-sm" id="btnRemoveFile">
+                                <span>Remove File</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <!-- Quick 1-Click Sonar Tester Bar -->
+        <div class="sample-picker-bar">
+            <span style="font-weight: 600; color: var(--text-dark); display: flex; align-items: center; gap: 0.45rem;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polygon points="12 8 8 12 12 16 16 12 12 8"></polygon>
+                </svg>
+                Instant Test Samples:
+            </span>
+            <button type="button" class="btn btn-outline btn-sm btn-load-sample" data-sample="debris">
+                Load Sample Sonar (Metallic Debris Target)
+            </button>
+            <button type="button" class="btn btn-outline btn-sm btn-load-sample" data-sample="anomaly">
+                Load Sample Sonar (Seabed Anomaly Target)
+            </button>
+        </div>
+    </div>
+</div>
+
+{% if selected_image %}
+<!-- =======================================================================
+     RESULTS SECTION — DISPLAYED ON THE EXACT SAME COMBINED PAGE
+     ======================================================================= -->
+
+<!-- Section C: Processing State Pipeline Tracker -->
+<div class="card reveal seq-2" style="margin-bottom: 2rem;" id="resultsAnchor">
+    <div class="card-header">
+        <h3 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+            </svg>
+            <span>Processing Pipeline Status — Image #{{ selected_image.image_id }}</span>
+        </h3>
+        <span class="badge-tag {% if latest_run and latest_run.status == 'COMPLETED' %}badge-success{% else %}badge-pending{% endif %}">
+            Status: {% if latest_run %}{{ latest_run.status }}{% else %}{{ selected_image.status }}{% endif %}
+        </span>
+    </div>
+    <div class="card-body">
+        <div class="processing-tracker">
+            <div class="track-step done">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <strong>1. File Validated</strong>
+                <span>{{ selected_image.file_format }} &bull; {{ selected_image.file_size_kb }} KB</span>
+            </div>
+
+            <div class="track-step done">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <strong>2. Stored & Indexed</strong>
+                <span>SQLite DB Record #{{ selected_image.image_id }}</span>
+            </div>
+
+            <div class="track-step done">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <strong>3. OpenCV Preprocessed</strong>
+                <span>CLAHE + Bilateral Denoising</span>
+            </div>
+
+            <div class="track-step {% if debris_model_available %}done{% else %}pending{% endif %}">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    {% if debris_model_available %}
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    {% else %}
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    {% endif %}
+                </svg>
+                <strong>4. Debris Inference</strong>
+                <span>{% if debris_model_available %}Executed ({{ latest_run.debris_count }}){% else %}Pending Weights{% endif %}</span>
+            </div>
+
+            <div class="track-step {% if anomaly_model_available %}done{% else %}pending{% endif %}">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    {% if anomaly_model_available %}
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    {% else %}
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    {% endif %}
+                </svg>
+                <strong>5. Anomaly Inference</strong>
+                <span>{% if anomaly_model_available %}Executed ({{ latest_run.anomaly_count }}){% else %}Pending Weights{% endif %}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section D: Original and Processed Sonar Comparison -->
+<div class="card reveal seq-3" style="margin-bottom: 2rem;">
+    <div class="card-header">
+        <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+            <h3 class="card-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="12" y1="3" x2="12" y2="21"></line>
+                </svg>
+                <span>Acoustic Backscatter Visual Inspection</span>
+            </h3>
+            <span style="font-size: 0.82rem; color: var(--text-muted);">
+                Dimensions: {{ selected_image.width_px }} &times; {{ selected_image.height_px }} px
+            </span>
+        </div>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button class="btn btn-outline btn-sm active" data-view-mode="dual">Dual Comparison</button>
+            <button class="btn btn-outline btn-sm" data-view-mode="processed">Processed Only</button>
+            <button class="btn btn-outline btn-sm" data-view-mode="original">Original Only</button>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="sonar-viewport-grid">
+            <!-- Left: Original Sonar Image -->
+            <div class="sonar-frame" id="sonarFrameOriginal">
+                <div class="sonar-frame-header">
+                    <span>ORIGINAL SONAR BACKSCATTER</span>
+                    <span style="color: #94A3B8; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;">Raw Ingest</span>
+                </div>
+                <div class="sonar-img-wrap">
+                    <img src="/{{ selected_image.stored_path }}" alt="Original Sonar Image">
+                </div>
+            </div>
+
+            <!-- Right: Preprocessed / Enhanced Sonar Image -->
+            <div class="sonar-frame" id="sonarFrameProcessed">
+                <div class="sonar-frame-header">
+                    <span>PREPROCESSED / CLAHE ENHANCED</span>
+                    <span style="color: var(--accent); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;">Bilateral Denoised</span>
+                </div>
+                <div class="sonar-img-wrap">
+                    {% if latest_run and latest_run.processed_path %}
+                        <img src="/{{ latest_run.processed_path }}" alt="Preprocessed Sonar Image">
+                    {% else %}
+                        <div style="color: #94A3B8; text-align: center; padding: 2rem;">
+                            Preprocessing in progress...
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section E & F: Debris & Anomaly Detection Results -->
+<div class="content-grid grid-cols-2" style="margin-bottom: 2rem;">
+    <!-- Section E: Marine Debris Detection Card -->
+    <div class="card reveal seq-3" id="debris-results-card">
+        <div class="card-header">
+            <h3 class="card-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+                    <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                    <polyline points="2 17 12 22 22 17"></polyline>
+                    <polyline points="2 12 12 17 22 12"></polyline>
+                </svg>
+                <span>Marine Debris Detection Results</span>
+            </h3>
+            <span class="badge-tag {% if debris_model_available and detections %}badge-success{% else %}badge-pending{% endif %}">
+                Count: {{ latest_run.debris_count if latest_run else 0 }}
+            </span>
+        </div>
+        <div class="card-body">
+            {% if debris_model_available %}
+                {% if detections %}
+                <!-- Real detections table -->
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Class</th>
+                                <th>Confidence</th>
+                                <th>Bounding Box</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for d in detections %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td><strong>{{ d.class_label }}</strong></td>
+                                <td><span class="badge-tag badge-success">{{ "%.1f"|format(d.confidence * 100) }}%</span></td>
+                                <td style="font-family: monospace; font-size: 0.8rem;">[{{ d.x_min }}, {{ d.y_min }}, {{ d.x_max }}, {{ d.y_max }}]</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="notice-banner notice-success" style="background: rgba(16, 185, 129, 0.08); border-left: 3px solid #10B981; padding: 0.9rem;">
+                    <div style="font-weight: 700; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.4rem; color: #10B981;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>Seabed Area Clear — 0 Debris Detected</span>
+                    </div>
+                    <p style="margin-bottom: 0.25rem; font-size: 0.85rem;">
+                        The trained YOLO neural detector evaluated the sonar imagery and confirmed no marine debris objects exceed the detection threshold.
+                    </p>
+                </div>
+                {% endif %}
+            {% else %}
+                <!-- REQUIRED TEXT WHEN MODEL NOT CONFIGURED -->
+                <div class="notice-banner notice-pending">
+                    <div style="font-weight: 700; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.4rem;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        <span>Model Integration Notice</span>
+                    </div>
+                    <p style="margin-bottom: 0.5rem;">
+                        <strong>Marine debris detection is pending model integration. No AI detections have been generated.</strong>
+                    </p>
+                    <p style="font-size: 0.82rem; opacity: 0.9;">
+                        The OpenCV preprocessing stage completed successfully. Trained YOLO weights (<code>yolo_debris.pt</code>) can be placed in the <code>models/</code> directory to enable live neural inference.
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Section F: Underwater Anomaly Results Card -->
+    <div class="card reveal seq-4" id="anomaly-results-card">
+        <div class="card-header">
+            <h3 class="card-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M12 16v-4"></path>
+                    <path d="M12 8h.01"></path>
+                </svg>
+                <span>Underwater Anomaly Results</span>
+            </h3>
+            <span class="badge-tag {% if anomaly_model_available and anomalies %}badge-success{% else %}badge-pending{% endif %}">
+                Count: {{ latest_run.anomaly_count if latest_run else 0 }}
+            </span>
+        </div>
+        <div class="card-body">
+            {% if anomaly_model_available %}
+                {% if anomalies %}
+                <!-- Real anomalies table -->
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Score</th>
+                                <th>Severity</th>
+                                <th>Region (x, y, w, h)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for a in anomalies %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>{{ "%.3f"|format(a.anomaly_score) }}</td>
+                                <td>
+                                    <span class="badge-tag {% if a.severity == 'HIGH' %}badge-danger{% elif a.severity == 'MEDIUM' %}badge-pending{% else %}badge-info{% endif %}">
+                                        {{ a.severity }}
+                                    </span>
+                                </td>
+                                <td style="font-family: monospace; font-size: 0.8rem;">[{{ a.x }}, {{ a.y }}, {{ a.width }}, {{ a.height }}]</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="notice-banner notice-success" style="background: rgba(16, 185, 129, 0.08); border-left: 3px solid #10B981; padding: 0.9rem;">
+                    <div style="font-weight: 700; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.4rem; color: #10B981;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>Normal Seabed Profile — 0 Anomalies Flagged</span>
+                    </div>
+                    <p style="margin-bottom: 0.25rem; font-size: 0.85rem;">
+                        Convolutional autoencoder reconstruction error is within the normal statistical threshold. No candidate anomalous regions detected.
+                    </p>
+                </div>
+                {% endif %}
+            {% else %}
+                <!-- REQUIRED TEXT WHEN MODEL NOT CONFIGURED -->
+                <div class="notice-banner notice-pending">
+                    <div style="font-weight: 700; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.4rem;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        <span>Model Integration Notice</span>
+                    </div>
+                    <p style="margin-bottom: 0.5rem;">
+                        <strong>Anomaly detection is pending model integration. No AI anomaly results have been generated.</strong>
+                    </p>
+                    <p style="font-size: 0.82rem; opacity: 0.9;">
+                        The seabed texture enhancement pipeline is active. An autoencoder or CNN reconstruction model can be registered in <code>models/autoencoder_anomaly.pth</code> for unsupervised anomaly scoring.
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Section G: Comprehensive Analysis Summary Table -->
+<div class="card reveal seq-3" style="margin-bottom: 2rem;">
+    <div class="card-header">
+        <h3 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            <span>Analysis Run Metadata & Processing Benchmarks</span>
+        </h3>
+    </div>
+    <div class="card-body" style="padding: 0;">
+        <div class="table-responsive">
+            <table class="table">
+                <tbody>
+                    <tr>
+                        <td style="width: 25%; font-weight: 600; color: var(--text-muted);">Image ID / Run ID</td>
+                        <td style="width: 25%;">Image #{{ selected_image.image_id }} &bull; Run #{{ latest_run.run_id if latest_run else 'N/A' }}</td>
+                        <td style="width: 25%; font-weight: 600; color: var(--text-muted);">Overall Analysis Status</td>
+                        <td style="width: 25%;">
+                            <span class="badge-tag {% if latest_run and latest_run.status == 'COMPLETED' %}badge-success{% else %}badge-pending{% endif %}">
+                                {{ latest_run.status if latest_run else selected_image.status }}
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: 600; color: var(--text-muted);">Original Filename</td>
+                        <td><strong style="color: var(--text-dark);">{{ selected_image.original_filename }}</strong></td>
+                        <td style="font-weight: 600; color: var(--text-muted);">Format & Dimensions</td>
+                        <td>{{ selected_image.file_format }} &bull; {{ selected_image.width_px }} &times; {{ selected_image.height_px }} px ({{ selected_image.file_size_kb }} KB)</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: 600; color: var(--text-muted);">Upload Timestamp</td>
+                        <td>{{ selected_image.uploaded_at }}</td>
+                        <td style="font-weight: 600; color: var(--text-muted);">Processing Duration</td>
+                        <td>
+                            {% if latest_run and latest_run.processing_time_sec is not none %}
+                                <strong style="color: #059669;">{{ latest_run.processing_time_sec }} seconds</strong>
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: 600; color: var(--text-muted);">OpenCV Preprocessing</td>
+                        <td><span style="color: #059669; font-weight: 600;">Completed (CLAHE + Bilateral)</span></td>
+                        <td style="font-weight: 600; color: var(--text-muted);">AI Models Status</td>
+                        <td>
+                            <span style="color: #D97706; font-weight: 600;">Pending Weights Integration (Clean Audit)</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Section H & I: Download Report & Page Action Buttons -->
+<div class="page-actions-bar reveal">
+    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+        <a href="{{ url_for('analyze') }}" class="btn btn-outline" id="btn-upload-another">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+            </svg>
+            <span>Upload Another Image</span>
+        </a>
+        <a href="{{ url_for('history') }}" class="btn btn-outline" id="btn-view-all-history">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 14 14"></polyline>
+            </svg>
+            <span>View Analysis History</span>
+        </a>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-outline" id="btn-back-dashboard">
+            <span>Back to Dashboard</span>
+        </a>
+    </div>
+
+    <!-- Section H: Prominent Download Report Button -->
+    {% if latest_run %}
+    <div>
+        <a href="{{ url_for('download_report', run_id=latest_run.run_id) }}" class="btn btn-primary btn-lg" id="btn-download-pdf-report">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            <span>Download Analysis Report (PDF)</span>
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}
