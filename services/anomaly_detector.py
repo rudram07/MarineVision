@@ -6,7 +6,6 @@ Strictly avoids fabricating anomaly scores or regions when trained weights are m
 
 import os
 from config import Config
-from anomaly_detector import get_anomaly_detector, SonarAnomalyDetector
 
 
 class AnomalyDetector:
@@ -17,6 +16,7 @@ class AnomalyDetector:
     def __init__(self, weights_path=None, score_threshold=None):
         self.weights_path = weights_path or Config.ANOMALY_WEIGHTS_PATH
         self.score_threshold = score_threshold
+        from anomaly_detector import get_anomaly_detector
         self.detector = get_anomaly_detector(weights_path=self.weights_path, score_threshold=self.score_threshold)
 
     @property

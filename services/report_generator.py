@@ -151,28 +151,7 @@ class ReportGenerator:
         ]))
         story.append(t_header)
         story.append(Spacer(1, 6))
-        story.append(HRFlowable(width="100%", thickness=2, color=self.c_accent, spaceBefore=2, spaceAfter=10))
-
-        # Project Info Banner
-        project_meta = [
-            [
-                Paragraph(f"<b>Project:</b> {Config.PROJECT_TITLE}", self.cell_normal),
-            ],
-            [
-                Paragraph(f"<b>Institution:</b> {Config.INSTITUTION} &bull; {Config.DEPARTMENT} &bull; Group {Config.GROUP_NO} ({Config.GROUP_NAME})", self.cell_normal),
-            ],
-            [
-                Paragraph(f"<b>Scholars:</b> Rudra Mistry (14311), Jaimin Thakkar (14159), Meet Patel (14486) | <b>Supervisor:</b> {Config.SUPERVISOR}", self.cell_normal)
-            ]
-        ]
-        t_proj = Table(project_meta, colWidths=[540])
-        t_proj.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor("#F0FDF4")),
-            ('BOX', (0, 0), (-1, -1), 1, colors.HexColor("#BBF7D0")),
-            ('PADDING', (0, 0), (-1, -1), 4),
-        ]))
-        story.append(t_proj)
-        story.append(Spacer(1, 10))
+        story.append(HRFlowable(width="100%", thickness=2, color=self.c_accent, spaceBefore=2, spaceAfter=12))
 
         # =====================================================================
         # Section 1: Executive Metadata & Execution Benchmarks
@@ -275,6 +254,14 @@ class ReportGenerator:
         if proc_path and not os.path.isabs(proc_path):
             proc_path = os.path.join(Config.BASE_DIR, proc_path)
 
+        ai_path = run.get('annotated_path')
+        if ai_path and not os.path.isabs(ai_path):
+            ai_path = os.path.join(Config.BASE_DIR, ai_path)
+
+        # Use annotated red-marked image if available, else preprocessed
+        display_right_path = ai_path if (ai_path and os.path.exists(ai_path) and ai_path != proc_path) else proc_path
+        right_title = "<b>AI Neural Detection (Red Marked)</b>" if (ai_path and os.path.exists(ai_path) and ai_path != proc_path) else "<b>Preprocessed / CLAHE Enhanced</b>"
+
         # Embedded thumbnails
         thumb_w, thumb_h = 240, 150
         left_cell = Paragraph("<i>Original image unavailable</i>", self.cell_normal)
@@ -286,14 +273,14 @@ class ReportGenerator:
             except Exception as e:
                 left_cell = Paragraph(f"Error loading original image thumbnail: {e}", self.cell_normal)
 
-        if proc_path and os.path.exists(proc_path):
+        if display_right_path and os.path.exists(display_right_path):
             try:
-                right_cell = RLImage(proc_path, width=thumb_w, height=thumb_h)
+                right_cell = RLImage(display_right_path, width=thumb_w, height=thumb_h)
             except Exception as e:
                 right_cell = Paragraph(f"Error loading processed image thumbnail: {e}", self.cell_normal)
 
         img_table = Table([
-            [Paragraph("<b>Original Sonar Backscatter</b>", self.cell_bold), Paragraph("<b>Preprocessed / CLAHE Enhanced</b>", self.cell_bold)],
+            [Paragraph("<b>Original Sonar Backscatter</b>", self.cell_bold), Paragraph(right_title, self.cell_bold)],
             [left_cell, right_cell]
         ], colWidths=[270, 270])
         img_table.setStyle(TableStyle([
@@ -312,20 +299,29 @@ class ReportGenerator:
         story.append(Paragraph("4. AI Marine Debris Detection Assessment", self.h2_style))
         if run.get('debris_model_id'):
             if detections:
+                from services.result_visualizer import OBJECT_STRUCTURAL_PROFILES
                 det_rows = [[
                     Paragraph("<b>#</b>", self.cell_bold),
-                    Paragraph("<b>Class Label</b>", self.cell_bold),
+                    Paragraph("<b>Object Class & Shape</b>", self.cell_bold),
+                    Paragraph("<b>Structural Description</b>", self.cell_bold),
                     Paragraph("<b>Confidence</b>", self.cell_bold),
-                    Paragraph("<b>Bounding Box (x1, y1, x2, y2)</b>", self.cell_bold)
+                    Paragraph("<b>Bounding Box</b>", self.cell_bold)
                 ]]
                 for idx, d in enumerate(detections, 1):
+                    raw_lbl = str(d['class_label'])
+                    prof = OBJECT_STRUCTURAL_PROFILES.get(raw_lbl, {})
+                    disp_name = prof.get('display_name', raw_lbl.replace('_', ' ').title())
+                    shape_name = prof.get('shape', 'Acoustic Structure')
+                    struct_desc = prof.get('structure', 'Distinctive acoustic highlight and shadow.')
+
                     det_rows.append([
                         Paragraph(str(idx), self.cell_normal),
-                        Paragraph(str(d['class_label']), self.cell_normal),
+                        Paragraph(f"<b><font color='#DC2626'>{disp_name}</font></b><br/><font size='7' color='#64748B'>Shape: {shape_name}</font>", self.cell_normal),
+                        Paragraph(f"<font size='7.5'>{struct_desc}</font>", self.cell_normal),
                         Paragraph(f"{d['confidence']*100:.1f}%", self.cell_normal),
                         Paragraph(f"[{d['x_min']}, {d['y_min']}, {d['x_max']}, {d['y_max']}]", self.cell_normal)
                     ])
-                t_det = Table(det_rows, colWidths=[30, 150, 100, 260])
+                t_det = Table(det_rows, colWidths=[25, 125, 185, 65, 140])
                 t_det.setStyle(TableStyle([
                     ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#E2E8F0")),
                     ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#CBD5E1")),

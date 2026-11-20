@@ -6,7 +6,6 @@ Strictly avoids fabricating detections when trained weights are missing.
 
 import os
 from config import Config
-from detector import get_detector, SonarDetector
 
 
 class DebrisDetector:
@@ -14,9 +13,10 @@ class DebrisDetector:
     Flask service wrapper for YOLO-based Marine Debris Detection.
     Connects Flask analysis pipeline to detector.py.
     """
-    def __init__(self, weights_path=None, conf_threshold=0.30):
+    def __init__(self, weights_path=None, conf_threshold=0.55):
         self.weights_path = weights_path or Config.YOLO_WEIGHTS_PATH
         self.conf_threshold = conf_threshold
+        from detector import get_detector
         self.detector = get_detector(weights_path=self.weights_path, conf_threshold=self.conf_threshold)
 
     @property

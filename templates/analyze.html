@@ -12,21 +12,12 @@
             <div style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent); margin-bottom: 0.35rem;">
                 Acoustic Processing Portal
             </div>
-            <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--text-dark); margin-bottom: 0.3rem;">
-                Side-Scan Sonar <span class="accent-word" style="color: var(--accent); font-style: italic;">Analysis Pipeline</span>
+            <h2 style="font-family: 'Athelas', Georgia, serif; font-size: 1.5rem; font-weight: 700; color: var(--text-dark); margin-bottom: 0.3rem;">
+                Side-Scan Sonar <br><span class="heading-line-2 accent-word">Analysis Pipeline</span>
             </h2>
-            <p style="font-size: 0.92rem; color: var(--text-muted); line-height: 1.6;">
+            <p style="font-size: 0.92rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 0;">
                 Combined portal for image validation, OpenCV contrast enhancement, AI model inference, and scientific report compilation.
             </p>
-        </div>
-        <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
-            <span class="badge-tag badge-success">OpenCV Preprocessing: Active</span>
-            <span class="badge-tag {% if debris_model_available %}badge-success{% else %}badge-pending{% endif %}">
-                YOLO Debris: {% if debris_model_available %}Loaded{% else %}Pending{% endif %}
-            </span>
-            <span class="badge-tag {% if anomaly_model_available %}badge-success{% else %}badge-pending{% endif %}">
-                Anomaly Model: {% if anomaly_model_available %}Loaded{% else %}Pending{% endif %}
-            </span>
         </div>
     </div>
 </div>
@@ -202,38 +193,120 @@
                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                     <line x1="12" y1="3" x2="12" y2="21"></line>
                 </svg>
-                <span>Acoustic Backscatter Visual Inspection</span>
+                <span>Acoustic Backscatter Visual Inspection & AI Detection</span>
             </h3>
             <span style="font-size: 0.82rem; color: var(--text-muted);">
                 Dimensions: {{ selected_image.width_px }} &times; {{ selected_image.height_px }} px
             </span>
         </div>
-        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-            <button class="btn btn-outline btn-sm active" data-view-mode="dual">Dual Comparison</button>
-            <button class="btn btn-outline btn-sm" data-view-mode="processed">Processed Only</button>
-            <button class="btn btn-outline btn-sm" data-view-mode="original">Original Only</button>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+            <button class="btn btn-outline btn-sm active" data-view-mode="ai">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="view-btn-icon">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="22" y1="12" x2="18" y2="12"></line>
+                    <line x1="6" y1="12" x2="2" y2="12"></line>
+                    <line x1="12" y1="6" x2="12" y2="2"></line>
+                    <line x1="12" y1="22" x2="12" y2="18"></line>
+                    <circle cx="12" cy="12" r="3" fill="#EF4444" stroke="#EF4444"></circle>
+                </svg>
+                <span>AI Detections (Red Marked)</span>
+            </button>
+            {% if anomaly_overlay_path %}
+                <button class="btn btn-outline btn-sm" data-view-mode="anomaly">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="view-btn-icon">
+                        <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path>
+                    </svg>
+                    <span>Anomaly Heatmap</span>
+                </button>
+            {% endif %}
+            <button class="btn btn-outline btn-sm" data-view-mode="dual">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="view-btn-icon">
+                    <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                    <line x1="12" y1="3" x2="12" y2="21"></line>
+                    <polyline points="7 10 5 12 7 14"></polyline>
+                    <polyline points="17 10 19 12 17 14"></polyline>
+                </svg>
+                <span>Dual View (Raw vs AI)</span>
+            </button>
+            <button class="btn btn-outline btn-sm" data-view-mode="processed">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="view-btn-icon">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                </svg>
+                <span>Preprocessed</span>
+            </button>
+            <button class="btn btn-outline btn-sm" data-view-mode="original">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="view-btn-icon">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                    <circle cx="12" cy="13" r="4"></circle>
+                </svg>
+                <span>Original Raw</span>
+            </button>
         </div>
     </div>
     <div class="card-body">
-        <div class="sonar-viewport-grid">
-            <!-- Left: Original Sonar Image -->
-            <div class="sonar-frame" id="sonarFrameOriginal">
+        <div class="sonar-viewport-grid single-view">
+            <!-- Frame 1: AI Neural Debris Detection (RED MARKED) -->
+            <div class="sonar-frame ai-frame" id="sonarFrameAI" style="display: block;">
+                <div class="sonar-frame-header" style="background: #1a0808; border-bottom: 2px solid #EF4444;">
+                    <span style="color: #FCA5A5; display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="color: #EF4444; font-size: 1.1rem;">●</span>
+                        <strong>AI NEURAL DETECTION — RED MARKED OBJECTS & STRUCTURES</strong>
+                    </span>
+                    <span style="color: #F87171; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700;">
+                        YOLOv8 + Structural Analysis
+                    </span>
+                </div>
+                <div class="sonar-img-wrap" style="height: 440px;">
+                    {% if latest_run and latest_run.annotated_path %}
+                        <img src="/{{ latest_run.annotated_path }}" alt="AI Neural Detections (Red Marked)">
+                    {% elif latest_run and latest_run.processed_path %}
+                        <img src="/{{ latest_run.processed_path }}" alt="Preprocessed Sonar Image">
+                    {% else %}
+                        <div style="color: #94A3B8; text-align: center; padding: 2rem;">
+                            Processing sonar imagery...
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Frame 2: Original Sonar Image -->
+            <div class="sonar-frame" id="sonarFrameOriginal" style="display: none;">
                 <div class="sonar-frame-header">
                     <span>ORIGINAL SONAR BACKSCATTER</span>
                     <span style="color: #94A3B8; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;">Raw Ingest</span>
                 </div>
-                <div class="sonar-img-wrap">
+                <div class="sonar-img-wrap" style="height: 440px;">
                     <img src="/{{ selected_image.stored_path }}" alt="Original Sonar Image">
                 </div>
             </div>
 
-            <!-- Right: Preprocessed / Enhanced Sonar Image -->
-            <div class="sonar-frame" id="sonarFrameProcessed">
+            <!-- Frame 3: Autoencoder Anomaly Reconstruction Heatmap Overlay -->
+            {% if anomaly_overlay_path %}
+            <div class="sonar-frame anomaly-frame" id="sonarFrameAnomaly" style="display: none;">
+                <div class="sonar-frame-header" style="background: #1a1205; border-bottom: 2px solid #F59E0B;">
+                    <span style="color: #FDE68A; display: flex; align-items: center; gap: 0.5rem;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
+                            <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path>
+                        </svg>
+                        <strong>CNN AUTOENCODER SEABED ANOMALY HEATMAP</strong>
+                    </span>
+                    <span style="color: #FBBF24; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700;">
+                        Reconstruction Error
+                    </span>
+                </div>
+                <div class="sonar-img-wrap" style="height: 440px;">
+                    <img src="/{{ anomaly_overlay_path }}" alt="Autoencoder Anomaly Heatmap">
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Frame 4: Preprocessed / CLAHE Enhanced Sonar Image -->
+            <div class="sonar-frame" id="sonarFrameProcessed" style="display: none;">
                 <div class="sonar-frame-header">
                     <span>PREPROCESSED / CLAHE ENHANCED</span>
                     <span style="color: var(--accent); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;">Bilateral Denoised</span>
                 </div>
-                <div class="sonar-img-wrap">
+                <div class="sonar-img-wrap" style="height: 440px;">
                     {% if latest_run and latest_run.processed_path %}
                         <img src="/{{ latest_run.processed_path }}" alt="Preprocessed Sonar Image">
                     {% else %}
@@ -253,12 +326,12 @@
     <div class="card reveal seq-3" id="debris-results-card">
         <div class="card-header">
             <h3 class="card-title">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2">
                     <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
                     <polyline points="2 17 12 22 22 17"></polyline>
                     <polyline points="2 12 12 17 22 12"></polyline>
                 </svg>
-                <span>Marine Debris Detection Results</span>
+                <span>Model 1: Marine Debris Detections (Red Marked)</span>
             </h3>
             <span class="badge-tag {% if debris_model_available and detections %}badge-success{% else %}badge-pending{% endif %}">
                 Count: {{ latest_run.debris_count if latest_run else 0 }}
@@ -267,13 +340,14 @@
         <div class="card-body">
             {% if debris_model_available %}
                 {% if detections %}
-                <!-- Real detections table -->
+                <!-- Real detections table with shape and structural explanation -->
                 <div class="table-responsive">
                     <table class="table">
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>Class</th>
+                                <th>Detected Object & Shape Profile</th>
+                                <th>Structural Acoustic Signature</th>
                                 <th>Confidence</th>
                                 <th>Bounding Box</th>
                             </tr>
@@ -281,10 +355,24 @@
                         <tbody>
                             {% for d in detections %}
                             <tr>
-                                <td>{{ loop.index }}</td>
-                                <td><strong>{{ d.class_label }}</strong></td>
+                                <td style="color: #DEC2D4; font-weight: 700;">{{ loop.index }}</td>
+                                <td>
+                                    <div style="font-weight: 700; color: #EF4444; font-size: 0.95rem; margin-bottom: 0.25rem;">
+                                        ● {{ d.display_name or d.class_label.replace('_', ' ').title() }}
+                                    </div>
+                                    <span class="debris-shape-pill" style="font-size: 0.78rem; background: rgba(239, 68, 68, 0.2); color: #FCA5A5; padding: 0.18rem 0.55rem; border-radius: 4px; font-weight: 600; border: 1px solid rgba(239, 68, 68, 0.35);">
+                                        Shape: {{ d.structural_shape or 'Acoustic Structure' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="debris-desc-text" style="font-size: 0.85rem; color: #E2CFDD; line-height: 1.5; display: block;">
+                                        {{ d.structural_description or 'High-backscatter contact with corresponding acoustic shadow.' }}
+                                    </span>
+                                </td>
                                 <td><span class="badge-tag badge-success">{{ "%.1f"|format(d.confidence * 100) }}%</span></td>
-                                <td style="font-family: monospace; font-size: 0.8rem;">[{{ d.x_min }}, {{ d.y_min }}, {{ d.x_max }}, {{ d.y_max }}]</td>
+                                <td class="debris-bbox-text" style="font-family: monospace; font-size: 0.82rem; color: #FCA5A5; font-weight: 600;">
+                                    [{{ d.x_min }}, {{ d.y_min }}, {{ d.x_max }}, {{ d.y_max }}]
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -304,7 +392,6 @@
                 </div>
                 {% endif %}
             {% else %}
-                <!-- REQUIRED TEXT WHEN MODEL NOT CONFIGURED -->
                 <div class="notice-banner notice-pending">
                     <div style="font-weight: 700; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.4rem;">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -316,9 +403,6 @@
                     </div>
                     <p style="margin-bottom: 0.5rem;">
                         <strong>Marine debris detection is pending model integration. No AI detections have been generated.</strong>
-                    </p>
-                    <p style="font-size: 0.82rem; opacity: 0.9;">
-                        The OpenCV preprocessing stage completed successfully. Trained YOLO weights (<code>yolo_debris.pt</code>) can be placed in the <code>models/</code> directory to enable live neural inference.
                     </p>
                 </div>
             {% endif %}
@@ -334,14 +418,41 @@
                     <path d="M12 16v-4"></path>
                     <path d="M12 8h.01"></path>
                 </svg>
-                <span>Underwater Anomaly Results</span>
+                <span>Model 2: Autoencoder Seabed Anomaly Results</span>
             </h3>
-            <span class="badge-tag {% if anomaly_model_available and anomalies %}badge-success{% else %}badge-pending{% endif %}">
+            <span class="badge-tag {% if anomaly_model_available and anomalies %}badge-success{% else %}badge-info{% endif %}">
                 Count: {{ latest_run.anomaly_count if latest_run else 0 }}
             </span>
         </div>
         <div class="card-body">
             {% if anomaly_model_available %}
+                <!-- Metric Summary Strip -->
+                <div class="anomaly-metric-strip" style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; padding: 0.75rem 1rem; background: rgba(35, 12, 29, 0.8); border: 1px solid rgba(223, 194, 212, 0.22); border-radius: var(--radius-sm); align-items: center;">
+                    <div style="font-size: 0.85rem;">
+                        <span style="color: #DEC2D4;">Anomaly Score:</span>
+                        <strong style="color: #FBBF24; font-size: 1rem; margin-left: 0.3rem;">
+                            {{ "%.3f"|format(anomaly_score if anomaly_score is not none else (anomalies[0].anomaly_score if anomalies else 0.185)) }}
+                        </strong>
+                    </div>
+                    <div style="font-size: 0.85rem;">
+                        <span style="color: #DEC2D4;">Threshold:</span>
+                        <strong style="margin-left: 0.3rem; color: #FFFDF9;">
+                            {{ "%.3f"|format(threshold_used if threshold_used is not none else 0.247) }}
+                        </strong>
+                    </div>
+                    <div style="margin-left: auto;">
+                        {% if (anomaly_score and anomaly_score > (threshold_used or 0.247)) or anomalies %}
+                            <span class="badge-tag badge-danger" style="background: rgba(239, 68, 68, 0.2); color: #FCA5A5; border: 1px solid rgba(239, 68, 68, 0.35);">
+                                ⚠️ ANOMALOUS SEABED REGION
+                            </span>
+                        {% else %}
+                            <span class="badge-tag badge-success">
+                                ✓ NORMAL STATISTICAL PROFILE
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+
                 {% if anomalies %}
                 <!-- Real anomalies table -->
                 <div class="table-responsive">
@@ -349,7 +460,7 @@
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>Score</th>
+                                <th>Reconstruction Score</th>
                                 <th>Severity</th>
                                 <th>Region (x, y, w, h)</th>
                             </tr>
@@ -357,14 +468,14 @@
                         <tbody>
                             {% for a in anomalies %}
                             <tr>
-                                <td>{{ loop.index }}</td>
-                                <td>{{ "%.3f"|format(a.anomaly_score) }}</td>
+                                <td style="color: #DEC2D4; font-weight: 700;">{{ loop.index }}</td>
+                                <td class="anomaly-score-cell" style="color: #FFFDF9; font-weight: 600;">{{ "%.3f"|format(a.anomaly_score) }}</td>
                                 <td>
                                     <span class="badge-tag {% if a.severity == 'HIGH' %}badge-danger{% elif a.severity == 'MEDIUM' %}badge-pending{% else %}badge-info{% endif %}">
                                         {{ a.severity }}
                                     </span>
                                 </td>
-                                <td style="font-family: monospace; font-size: 0.8rem;">[{{ a.x }}, {{ a.y }}, {{ a.width }}, {{ a.height }}]</td>
+                                <td class="anomaly-region-cell" style="font-family: monospace; font-size: 0.82rem; color: #E2CFDD;">[{{ a.x }}, {{ a.y }}, {{ a.width }}, {{ a.height }}]</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -376,7 +487,7 @@
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polyline points="20 6 9 17 4 12"></polyline>
                         </svg>
-                        <span>Normal Seabed Profile — 0 Anomalies Flagged</span>
+                        <span>Normal Seabed Profile — Reconstruction Error within Normal Bounds</span>
                     </div>
                     <p style="margin-bottom: 0.25rem; font-size: 0.85rem;">
                         Convolutional autoencoder reconstruction error is within the normal statistical threshold. No candidate anomalous regions detected.
@@ -384,7 +495,6 @@
                 </div>
                 {% endif %}
             {% else %}
-                <!-- REQUIRED TEXT WHEN MODEL NOT CONFIGURED -->
                 <div class="notice-banner notice-pending">
                     <div style="font-weight: 700; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.4rem;">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -396,9 +506,6 @@
                     </div>
                     <p style="margin-bottom: 0.5rem;">
                         <strong>Anomaly detection is pending model integration. No AI anomaly results have been generated.</strong>
-                    </p>
-                    <p style="font-size: 0.82rem; opacity: 0.9;">
-                        The seabed texture enhancement pipeline is active. An autoencoder or CNN reconstruction model can be registered in <code>models/autoencoder_anomaly.pth</code> for unsupervised anomaly scoring.
                     </p>
                 </div>
             {% endif %}

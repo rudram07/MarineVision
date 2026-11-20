@@ -12,7 +12,9 @@
         localStorage.setItem('marinevision-theme', theme);
         const btn = document.getElementById('theme-toggle');
         if (btn) {
-            btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+            const label = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+            btn.setAttribute('aria-label', label);
+            btn.setAttribute('title', label);
         }
     }
 
@@ -22,10 +24,13 @@
     document.addEventListener('DOMContentLoaded', () => {
         const btn = document.getElementById('theme-toggle');
         if (btn) {
-            btn.textContent = (document.documentElement.getAttribute('data-theme') === 'dark') ? '☀️' : '🌙';
+            const current = document.documentElement.getAttribute('data-theme') || 'light';
+            const label = current === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+            btn.setAttribute('aria-label', label);
+            btn.setAttribute('title', label);
             btn.addEventListener('click', () => {
-                const current = document.documentElement.getAttribute('data-theme') || 'light';
-                const next = current === 'light' ? 'dark' : 'light';
+                const cur = document.documentElement.getAttribute('data-theme') || 'light';
+                const next = cur === 'light' ? 'dark' : 'light';
                 applyTheme(next);
             });
         }
@@ -38,9 +43,24 @@
                     observer.unobserve(entry.target);
                 }
             });
-        }, { threshold: 0.02, rootMargin: '0px 0px 80px 0px' });
+        }, { threshold: 0.05, rootMargin: '0px 0px -40px 0px' });
 
         document.querySelectorAll('.reveal, .reveal-slow').forEach(el => observer.observe(el));
+
+        // Mobile Top Nav Toggle
+        const mobileToggle = document.getElementById('mobileNavToggle');
+        const topNav = document.getElementById('topNavLinks');
+        if (mobileToggle && topNav) {
+            mobileToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                topNav.classList.toggle('open');
+            });
+            document.addEventListener('click', (e) => {
+                if (!topNav.contains(e.target) && !mobileToggle.contains(e.target)) {
+                    topNav.classList.remove('open');
+                }
+            });
+        }
     });
 })();
 
@@ -214,7 +234,14 @@ function initUploadForm() {
             return;
         }
 
-        // Show progressive feedback
+        // Disable submit button to prevent double submission
+        const submitBtn = document.getElementById('btnUploadSubmit');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-sm"></span> Processing...';
+        }
+
+        // Show progressive feedback covering the full processing duration
         showProcessingProgress("Submitting & Preprocessing Sonar Imagery...");
     });
 }
@@ -226,19 +253,27 @@ function showProcessingProgress(initialText) {
         modal.style.display = 'flex';
         if (msg && initialText) msg.textContent = initialText;
 
-        // Sequence realistic stages
-        setTimeout(() => {
-            if (msg) msg.textContent = "Validating Sonar File & Checking Image Integrity...";
-        }, 300);
-        setTimeout(() => {
-            if (msg) msg.textContent = "Applying OpenCV Preprocessing (CLAHE & Bilateral Filter)...";
-        }, 700);
-        setTimeout(() => {
-            if (msg) msg.textContent = "Querying Marine Debris & Anomaly Model Interfaces...";
-        }, 1100);
-        setTimeout(() => {
-            if (msg) msg.textContent = "Persisting Run Metadata to SQLite Database...";
-        }, 1400);
+        // Sequence realistic stages across the full expected processing window
+        const stages = [
+            { delay: 500,   text: "Validating Sonar File & Checking Image Integrity..." },
+            { delay: 1500,  text: "Applying OpenCV Preprocessing (CLAHE & Bilateral Filter)..." },
+            { delay: 4000,  text: "Running YOLO Neural Network — Marine Debris Detection..." },
+            { delay: 10000, text: "Executing Convolutional Autoencoder — Anomaly Scoring..." },
+            { delay: 18000, text: "Generating RED-Marked Annotations & Comparison Views..." },
+            { delay: 25000, text: "Persisting Run Metadata & Detections to SQLite..." },
+            { delay: 35000, text: "Almost done — Finalizing analysis results..." },
+            { delay: 50000, text: "Processing large image — This may take a moment..." },
+            { delay: 70000, text: "Still processing — AI inference running on CPU..." },
+            { delay: 90000, text: "Wrapping up — Please wait a few more seconds..." }
+        ];
+
+        stages.forEach(stage => {
+            setTimeout(() => {
+                if (msg && modal.style.display === 'flex') {
+                    msg.textContent = stage.text;
+                }
+            }, stage.delay);
+        });
     }
 }
 
@@ -247,12 +282,16 @@ function hideProcessingProgress() {
     if (modal) modal.style.display = 'none';
 }
 
+
 /**
  * Image Comparison Zoom / View Toggle
  */
 function initImageZoomModal() {
     const viewButtons = document.querySelectorAll('[data-view-mode]');
+    const grid = document.querySelector('.sonar-viewport-grid');
     const frameOriginal = document.getElementById('sonarFrameOriginal');
+    const frameAI = document.getElementById('sonarFrameAI');
+    const frameAnomaly = document.getElementById('sonarFrameAnomaly');
     const frameProcessed = document.getElementById('sonarFrameProcessed');
 
     viewButtons.forEach(btn => {
@@ -261,15 +300,27 @@ function initImageZoomModal() {
             btn.classList.add('active');
 
             const mode = btn.getAttribute('data-view-mode');
+            if (frameOriginal) frameOriginal.style.display = 'none';
+            if (frameAI) frameAI.style.display = 'none';
+            if (frameAnomaly) frameAnomaly.style.display = 'none';
+            if (frameProcessed) frameProcessed.style.display = 'none';
+            if (grid) grid.classList.remove('single-view');
+
             if (mode === 'dual') {
                 if (frameOriginal) frameOriginal.style.display = 'block';
-                if (frameProcessed) frameProcessed.style.display = 'block';
+                if (frameAI) frameAI.style.display = 'block';
+            } else if (mode === 'ai') {
+                if (grid) grid.classList.add('single-view');
+                if (frameAI) frameAI.style.display = 'block';
+            } else if (mode === 'anomaly') {
+                if (grid) grid.classList.add('single-view');
+                if (frameAnomaly) frameAnomaly.style.display = 'block';
             } else if (mode === 'processed') {
-                if (frameOriginal) frameOriginal.style.display = 'none';
+                if (grid) grid.classList.add('single-view');
                 if (frameProcessed) frameProcessed.style.display = 'block';
             } else if (mode === 'original') {
+                if (grid) grid.classList.add('single-view');
                 if (frameOriginal) frameOriginal.style.display = 'block';
-                if (frameProcessed) frameProcessed.style.display = 'none';
             }
         });
     });

@@ -131,26 +131,48 @@ class DatabaseManager:
             conn.commit()
             return cursor.lastrowid
 
-    def complete_analysis_run(self, run_id, processed_path, annotated_path, debris_count, anomaly_count, processing_time_sec, status='COMPLETED', error_message=None):
+    def complete_analysis_run(self, run_id, processed_path, annotated_path, debris_count, anomaly_count, processing_time_sec, status='COMPLETED', error_message=None, preprocess_params=None):
         """Updates analysis run upon completion or failure."""
-        query = """
-            UPDATE analysis_runs
-            SET processed_path = ?,
-                annotated_path = ?,
-                debris_count = ?,
-                anomaly_count = ?,
-                processing_time_sec = ?,
-                status = ?,
-                error_message = ?,
-                completed_at = CURRENT_TIMESTAMP
-            WHERE run_id = ?
-        """
-        with self.get_connection() as conn:
-            conn.execute(query, (
-                processed_path, annotated_path, debris_count, anomaly_count,
-                processing_time_sec, status, error_message, run_id
-            ))
-            conn.commit()
+        params_json = json.dumps(preprocess_params) if preprocess_params else None
+        if params_json:
+            query = """
+                UPDATE analysis_runs
+                SET processed_path = ?,
+                    annotated_path = ?,
+                    debris_count = ?,
+                    anomaly_count = ?,
+                    processing_time_sec = ?,
+                    status = ?,
+                    error_message = ?,
+                    preprocess_params = ?,
+                    completed_at = CURRENT_TIMESTAMP
+                WHERE run_id = ?
+            """
+            with self.get_connection() as conn:
+                conn.execute(query, (
+                    processed_path, annotated_path, debris_count, anomaly_count,
+                    processing_time_sec, status, error_message, params_json, run_id
+                ))
+                conn.commit()
+        else:
+            query = """
+                UPDATE analysis_runs
+                SET processed_path = ?,
+                    annotated_path = ?,
+                    debris_count = ?,
+                    anomaly_count = ?,
+                    processing_time_sec = ?,
+                    status = ?,
+                    error_message = ?,
+                    completed_at = CURRENT_TIMESTAMP
+                WHERE run_id = ?
+            """
+            with self.get_connection() as conn:
+                conn.execute(query, (
+                    processed_path, annotated_path, debris_count, anomaly_count,
+                    processing_time_sec, status, error_message, run_id
+                ))
+                conn.commit()
 
     def get_run(self, run_id):
         """Gets analysis run by run_id with image metadata joined."""

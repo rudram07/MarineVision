@@ -143,13 +143,13 @@ class MarineVisionMLTestSuite(unittest.TestCase):
 
     # 7. Five Main Navigation Routes & App Context
     def test_07_five_pages_and_navigation(self):
-        """Verifies all five required pages render HTTP 200 with correct sidebar navigation."""
+        """Verifies all five required pages render HTTP 200 with correct navigation."""
         pages = [
-            ('/intro', 'nav-intro'),
+            ('/intro', 'nav-dashboard'),
             ('/', 'nav-dashboard'),
             ('/analyze', 'nav-analyze'),
             ('/history', 'nav-history'),
-            ('/about', 'nav-about'),
+            ('/about', 'footer-about'),
         ]
         for route, nav_id in pages:
             with self.subTest(route=route):
@@ -157,6 +157,7 @@ class MarineVisionMLTestSuite(unittest.TestCase):
                 self.assertEqual(res.status_code, 200)
                 html = res.data.decode('utf-8')
                 self.assertIn(nav_id, html)
+                self.assertNotIn('nav-intro', html)
                 self.assertIn('MarineVision', html)
 
     # 8. Full Image Upload, Inference & Database Persistence

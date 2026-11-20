@@ -98,12 +98,13 @@ def create_app(config_class=Config):
     # Routes
     # =========================================================================
 
+    @app.route('/')
     @app.route('/intro')
     def intro():
         """Page 1: Welcome and Introduction to MarineVision."""
         return render_template('intro.html', active_page='intro')
 
-    @app.route('/')
+    @app.route('/dashboard')
     def dashboard():
         """Page 2: Main Dashboard with live SQLite metrics and activity."""
         metrics = db.get_dashboard_metrics()
@@ -140,9 +141,32 @@ def create_app(config_class=Config):
         latest_run = db.get_latest_run_for_image(image_id)
         detections = []
         anomalies = []
+        anomaly_overlay_path = None
+        anomaly_score = None
+        threshold_used = None
+
         if latest_run:
             detections = db.get_detections(latest_run['run_id'])
             anomalies = db.get_anomalies(latest_run['run_id'])
+
+            # Enrich detections with physical shape and structural characteristics
+            from services.result_visualizer import OBJECT_STRUCTURAL_PROFILES
+            for d in detections:
+                raw_cls = d.get('class_label', '')
+                prof = OBJECT_STRUCTURAL_PROFILES.get(raw_cls, {})
+                d['display_name'] = prof.get('display_name', raw_cls.replace('_', ' ').title())
+                d['structural_shape'] = prof.get('shape', 'Acoustic Target Structure')
+                d['structural_description'] = prof.get('structure', 'Acoustic contact with distinctive sonar backscatter.')
+
+            if latest_run.get('preprocess_params'):
+                try:
+                    import json
+                    p = json.loads(latest_run['preprocess_params']) if isinstance(latest_run['preprocess_params'], str) else latest_run['preprocess_params']
+                    anomaly_overlay_path = p.get('anomaly_overlay_path')
+                    anomaly_score = p.get('anomaly_score')
+                    threshold_used = p.get('threshold_used')
+                except Exception:
+                    pass
 
         return render_template(
             'analyze.html',
@@ -150,7 +174,10 @@ def create_app(config_class=Config):
             selected_image=image,
             latest_run=latest_run,
             detections=detections,
-            anomalies=anomalies
+            anomalies=anomalies,
+            anomaly_overlay_path=anomaly_overlay_path,
+            anomaly_score=anomaly_score,
+            threshold_used=threshold_used
         )
 
     @app.route('/upload', methods=['POST'])
@@ -326,17 +353,35 @@ def create_app(config_class=Config):
             abort(404, description=f"Analysis Run #{run_id} not found.")
 
         try:
-            pdf_path = report_gen.generate_report(run_id)
+            from services.report_generator import ReportGenerator
+            generator = ReportGenerator(db)
+
+            # Ensure clean regeneration by removing any stale cached file
+            rep_folder = app.config.get('REPORT_FOLDER', Config.REPORT_FOLDER)
+            pdf_filename = f"MarineVision_Analysis_{run_id}.pdf"
+            cached_path = os.path.join(rep_folder, pdf_filename)
+            if os.path.exists(cached_path):
+                try:
+                    os.remove(cached_path)
+                except Exception:
+                    pass
+
+            pdf_path = generator.generate_report(run_id)
             if not os.path.exists(pdf_path):
                 abort(500, description="Failed to create PDF report file on server.")
 
             download_name = f"MarineVision_Analysis_{run_id}.pdf"
-            return send_file(
+            response = send_file(
                 pdf_path,
                 mimetype='application/pdf',
                 as_attachment=True,
-                download_name=download_name
+                download_name=download_name,
+                max_age=0
             )
+            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+            return response
         except Exception as e:
             flash(f"Error generating PDF report: {str(e)}", "danger")
             return redirect(url_for('analyze_view', image_id=run['image_id']))
@@ -378,4 +423,5 @@ app = create_app()
 
 if __name__ == '__main__':
     # Local development server execution
-    app.run(host='127.0.0.1', port=5000, debug=True)
+    # use_reloader=False prevents double model loading (PyTorch + YOLO) which causes OOM crashes
+    app.run(host='127.0.0.1', port=5000, debug=True, use_reloader=False, threaded=True)

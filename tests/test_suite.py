@@ -43,15 +43,17 @@ class MarineVisionTestCase(unittest.TestCase):
                 self.assertEqual(response.status_code, 200, f"Route {route} failed with status {response.status_code}")
 
     def test_02_navigation_sidebar_presence(self):
-        """Verifies that all 5 sidebar navigation items are rendered on every page."""
+        """Verifies that navigation items are rendered on every page with Introduction removed."""
         for route in ['/intro', '/', '/analyze', '/history', '/about']:
             response = self.client.get(route)
             html = response.data.decode('utf-8')
-            self.assertIn('nav-intro', html)
+            self.assertNotIn('nav-intro', html)
             self.assertIn('nav-dashboard', html)
             self.assertIn('nav-analyze', html)
             self.assertIn('nav-history', html)
-            self.assertIn('nav-about', html)
+            self.assertNotIn('nav-about', html)
+            self.assertIn('footer-about', html)
+            self.assertIn('About System', html)
 
     def test_03_valid_image_upload_and_results(self):
         """Tests valid sonar image upload, OpenCV preprocessing, and SQLite persistence."""

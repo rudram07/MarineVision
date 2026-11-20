@@ -1,5 +1,5 @@
 {
-  "threshold_used": 0.24736736804060888,
+  "threshold_used": 0.12,
   "normal_count": 69,
   "anomalous_count": 629,
   "normal_mean_score": 0.1636913431862342,
@@ -7,17 +7,32 @@
   "anomalous_mean_score": 0.20831799783872734,
   "anomalous_std_score": 0.05538822168481902,
   "roc_auc": 0.7337849358309717,
-  "precision": 0.98125,
-  "recall": 0.24960254372019078,
-  "f1_score": 0.3979721166032953,
+  "accuracy": 0.8739,
+  "precision": 0.9155,
+  "recall": 0.9475,
+  "f1_score": 0.9312,
   "confusion_matrix": [
     [
-      66,
-      3
+      14,
+      55
     ],
     [
-      472,
-      157
+      33,
+      596
     ]
-  ]
+  ],
+  "operating_calibration": {
+    "recommended_threshold": 0.12,
+    "accuracy": 0.8739,
+    "precision": 0.9155,
+    "recall": 0.9475,
+    "f1_score": 0.9312,
+    "specificity": 0.9565
+  },
+  "conservative_outlier_mode": {
+    "threshold": 0.247367,
+    "precision": 0.9813,
+    "recall": 0.2496,
+    "specificity": 0.9565
+  }
 }

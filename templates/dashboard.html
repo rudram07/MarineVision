@@ -7,16 +7,19 @@
 {% block content %}
 <!-- Welcome & Action Banner -->
 <div class="card reveal" style="margin-bottom: 2rem;">
-    <div class="card-body" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.5rem;">
+    <div class="card-body"
+        style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.5rem;">
         <div>
-            <div style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent); margin-bottom: 0.4rem;">
+            <div
+                style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent); margin-bottom: 0.4rem;">
                 Operational Intelligence Console
             </div>
-            <h2 style="font-size: 1.6rem; font-weight: 700; color: var(--text-dark); margin-bottom: 0.4rem;">
-                Side-Scan Sonar <span class="accent-word" style="color: var(--accent); font-style: italic;">Analytics & Ingest</span>
+            <h2 style="font-family: 'Athelas', Georgia, serif; font-size: 1.6rem; font-weight: 700; color: var(--text-dark); margin-bottom: 0.4rem;">
+                Side-Scan Sonar <br><span class="heading-line-2 accent-word">Analytics & Ingest</span>
             </h2>
             <p style="font-size: 0.95rem; color: var(--text-muted); max-width: 680px; line-height: 1.6;">
-                Welcome to the MarineVision operational console. Monitor sonar image ingest status, inspect preprocessed backscatter, 
+                Welcome to the MarineVision operational console. Monitor sonar image ingest status, inspect preprocessed
+                backscatter,
                 and review debris and anomaly detection records directly from the SQLite database.
             </p>
         </div>
@@ -63,7 +66,8 @@
         <div class="metric-info">
             <h3>Completed Runs</h3>
             <div class="metric-number">{{ metrics.completed_analyses }}</div>
-            <div style="font-size: 0.75rem; color: var(--text-light); margin-top: 0.35rem;">Preprocessed & Analyzed</div>
+            <div style="font-size: 0.75rem; color: var(--text-light); margin-top: 0.35rem;">Preprocessed & Analyzed
+            </div>
         </div>
         <div class="metric-icon-box">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -105,10 +109,8 @@
     </div>
 </div>
 
-<!-- Main Dashboard Split: Recent Uploads & Model Status -->
-<div class="content-grid grid-cols-3" style="margin-bottom: 2rem;">
-    <!-- Recent Uploads Table (Span 2 columns) -->
-    <div class="card reveal seq-2" style="grid-column: span 2;">
+<!-- Recent Sonar Uploads Table (Full Width) -->
+<div class="card reveal seq-2" style="margin-bottom: 2rem;">
         <div class="card-header">
             <h3 class="card-title">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
@@ -142,24 +144,28 @@
                         <tr>
                             <td><strong>#{{ item.image_id }}</strong></td>
                             <td>
-                                <div style="font-weight: 600; color: var(--text-dark);">{{ item.original_filename }}</div>
-                                <div style="font-size: 0.75rem; color: var(--text-light);">{{ item.file_format }} &bull; {{ item.file_size_kb }} KB</div>
+                                <div style="font-weight: 600; color: var(--text-dark);">{{ item.original_filename }}
+                                </div>
+                                <div style="font-size: 0.75rem; color: var(--text-light);">{{ item.file_format }} &bull;
+                                    {{ item.file_size_kb }} KB</div>
                             </td>
                             <td>{{ item.width_px }} &times; {{ item.height_px }} px</td>
                             <td style="font-size: 0.8rem; color: var(--text-muted);">{{ item.uploaded_at }}</td>
                             <td>
                                 {% if item.run_status == 'COMPLETED' or item.image_status == 'ANALYZED' %}
-                                    <span class="badge-tag badge-success">ANALYZED</span>
+                                <span class="badge-tag badge-success">ANALYZED</span>
                                 {% elif item.run_status == 'RUNNING' or item.image_status == 'PROCESSING' %}
-                                    <span class="badge-tag badge-pending">PROCESSING</span>
+                                <span class="badge-tag badge-pending">PROCESSING</span>
                                 {% elif item.image_status == 'FAILED' %}
-                                    <span class="badge-tag badge-pending" style="color:#DC2626; border-color:#FECACA; background:#FEF2F2;">FAILED</span>
+                                <span class="badge-tag badge-pending"
+                                    style="color:#DC2626; border-color:#FECACA; background:#FEF2F2;">FAILED</span>
                                 {% else %}
-                                    <span class="badge-tag badge-info">{{ item.image_status }}</span>
+                                <span class="badge-tag badge-info">{{ item.image_status }}</span>
                                 {% endif %}
                             </td>
                             <td style="text-align: right;">
-                                <a href="{{ url_for('analyze_view', image_id=item.image_id) }}" class="btn btn-teal btn-sm">
+                                <a href="{{ url_for('analyze_view', image_id=item.image_id) }}"
+                                    class="btn btn-teal btn-sm">
                                     View Results
                                 </a>
                             </td>
@@ -180,100 +186,16 @@
                 </div>
                 <h4 class="empty-title">No Sonar Imagery Recorded Yet</h4>
                 <p class="empty-desc">
-                    Your SQLite database is active and ready. Upload your first Side-Scan Sonar image or test with a sample file to view real analysis.
+                    Your SQLite database is active and ready. Upload your first Side-Scan Sonar image or test with a
+                    sample file to view real analysis.
                 </p>
                 <div style="display: flex; justify-content: center; gap: 0.75rem;">
                     <a href="{{ url_for('analyze') }}" class="btn btn-primary btn-sm">Upload Sonar File</a>
-                    <button class="btn btn-outline btn-sm btn-load-sample" data-sample="debris">Load Sample SSS Image</button>
+                    <button class="btn btn-outline btn-sm btn-load-sample" data-sample="debris">Load Sample SSS
+                        Image</button>
                 </div>
             </div>
             {% endif %}
         </div>
     </div>
-
-    <!-- Right Column: Model Status & Quick Load Panel -->
-    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-        <!-- Model Status Card -->
-        <div class="card reveal seq-3">
-            <div class="card-header">
-                <h3 class="card-title">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
-                        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
-                        <polyline points="2 17 12 22 22 17"></polyline>
-                        <polyline points="2 12 12 17 22 12"></polyline>
-                    </svg>
-                    <span>Model Integration Status</span>
-                </h3>
-            </div>
-            <div class="card-body" style="font-size: 0.88rem;">
-                <!-- Debris Detector -->
-                <div class="model-status-card-box {% if debris_model_available %}active{% endif %}">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
-                        <strong style="color: var(--text-dark);">YOLO Debris Detector</strong>
-                        <span class="badge-tag {% if debris_model_available %}badge-success{% else %}badge-pending{% endif %}" style="font-size:0.7rem;">
-                            {% if debris_model_available %}ACTIVE{% else %}PENDING INTEGRATION{% endif %}
-                        </span>
-                    </div>
-                    <p class="model-status-card-desc">
-                        {{ debris_model_info.status_message }}
-                    </p>
-                </div>
-
-                <!-- Anomaly Detector -->
-                <div class="model-status-card-box {% if anomaly_model_available %}active{% endif %}">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
-                        <strong style="color: var(--text-dark);">Autoencoder Anomaly Model</strong>
-                        <span class="badge-tag {% if anomaly_model_available %}badge-success{% else %}badge-pending{% endif %}" style="font-size:0.7rem;">
-                            {% if anomaly_model_available %}ACTIVE{% else %}PENDING INTEGRATION{% endif %}
-                        </span>
-                    </div>
-                    <p class="model-status-card-desc">
-                        {{ anomaly_model_info.status_message }}
-                    </p>
-                </div>
-
-                <div style="font-size: 0.78rem; color: var(--text-muted); background: var(--bg-subtle); padding: 0.75rem 0.85rem; border-radius: var(--radius-sm); border: 1px dashed var(--border-light);">
-                    <strong>Honesty Guarantee:</strong> Per university project standards, no simulated or fabricated detections are presented.
-                </div>
-            </div>
-        </div>
-
-        <!-- Quick 1-Click Sonar Tester -->
-        <div class="card reveal seq-4">
-            <div class="card-header">
-                <h3 class="card-title">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <path d="M12 16v-4"></path>
-                        <path d="M12 8h.01"></path>
-                    </svg>
-                    <span>Instant Sample Testing</span>
-                </h3>
-            </div>
-            <div class="card-body">
-                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.85rem;">
-                    Test the complete preprocessing and analysis pipeline instantly with synthetic SSS backscatter samples:
-                </p>
-                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                    <button class="btn btn-outline btn-sm btn-load-sample" data-sample="debris" style="justify-content: flex-start; text-align: left;">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <line x1="12" y1="8" x2="12" y2="12"></line>
-                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                        </svg>
-                        <span>Test Sonar: Metallic Debris & Shadow</span>
-                    </button>
-                    <button class="btn btn-outline btn-sm btn-load-sample" data-sample="anomaly" style="justify-content: flex-start; text-align: left;">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
-                            <polyline points="2 17 12 22 22 17"></polyline>
-                            <polyline points="2 12 12 17 22 12"></polyline>
-                        </svg>
-                        <span>Test Sonar: Seabed Anomaly Crater</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 {% endblock %}

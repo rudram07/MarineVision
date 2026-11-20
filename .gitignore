@@ -30,6 +30,8 @@ runs/
 *.log
 
 # Checkpoints (Users should train locally using provided scripts)
+*.pt
+*.pth
 models/*.pt
 models/*.pth
 !models/model_metadata.json
